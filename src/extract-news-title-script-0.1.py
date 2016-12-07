@@ -3,7 +3,11 @@
 '''
 extract news' title 
 date format:
-date  \t newstime \n
+filename: 
+    ReutersNews106521_news_title.txt
+    20061020_20131126_bloomberg_news_news_title.txt
+content format:
+    date \t news_title \n
 '''
 
 import glob
@@ -11,8 +15,8 @@ from tqdm import tqdm
 
 
 # extract news in ReutersNews106521
-reuters_news_file = open('../dataset/ReutersNews106521_news_title', 'w')
-subfolder_list = glob.glob('../dataset/ReutersNews106521/*')
+reuters_news_file = open('../data/ReutersNews106521_news_title.txt', 'w')
+subfolder_list = glob.glob('../data/ReutersNews106521/*')
 pbar = tqdm(total=len(subfolder_list))
 for subfolder in subfolder_list:
     news_date = subfolder.split('/')[-1]
@@ -29,8 +33,8 @@ pbar.close()
 reuters_news_file.close()
 
 # extract news in 20061020_20131126_bloomberg_news
-bloomberg_news_file = open('../dataset/20061020_20131126_bloomberg_news_news_title', 'w')
-subfolder_list = glob.glob('../dataset/20061020_20131126_bloomberg_news/*')
+bloomberg_news_file = open('../data/20061020_20131126_bloomberg_news_news_title.txt', 'w')
+subfolder_list = glob.glob('../data/20061020_20131126_bloomberg_news/*')
 pbar = tqdm(total=len(subfolder_list))
 for subfolder in subfolder_list:
     news_date = ''.join(subfolder.split('/')[-1].split('-'))

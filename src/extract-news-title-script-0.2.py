@@ -3,15 +3,17 @@
 '''
 extract news' title 
 date format:
-date >> filename
-news title >> each line
+filename: 
+    news_date
+content:
+    news_title >> each line
 '''
 
 import os
 import glob
 from tqdm import tqdm
 
-cur_dir = '../dataset'
+cur_dir = '../data'
 reuters_folder = cur_dir + '/Reuters_news_title'
 bloomberg_folder = cur_dir + '/Bloomberg_news_title'
 
@@ -23,7 +25,7 @@ if os.path.exists(bloomberg_folder) == False:
     os.mkdir(bloomberg_folder)
 
 # extract news in ReutersNews106521
-subfolder_list = glob.glob('../dataset/ReutersNews106521/*')
+subfolder_list = glob.glob('../data/ReutersNews106521/*')
 pbar = tqdm(total=len(subfolder_list))
 for subfolder in subfolder_list:
     news_date = subfolder.split('/')[-1]
@@ -40,7 +42,7 @@ for subfolder in subfolder_list:
 pbar.close()
 
 # extract news in 20061020_20131126_bloomberg_news
-subfolder_list = glob.glob('../dataset/20061020_20131126_bloomberg_news/*')
+subfolder_list = glob.glob('../data/20061020_20131126_bloomberg_news/*')
 pbar = tqdm(total=len(subfolder_list))
 for subfolder in subfolder_list:
     news_date = ''.join(subfolder.split('/')[-1].split('-'))
