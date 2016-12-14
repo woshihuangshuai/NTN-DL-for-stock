@@ -45,6 +45,8 @@ for date_folder in date_folder_list:
             continue
         if news_title[-1] not in end_punctuation:
             news_title += '.\n'
+        else:
+            news_title += '\n'
         news_title_file.write(news_title)
         news_file.close()
         news_title_file.close()
@@ -72,6 +74,8 @@ for date_folder in date_folder_list:
             continue
         if news_title[-1] not in end_punctuation:
             news_title += '.\n'
+        else:
+            news_title += '\n'
         news_title_file.write(news_title)
         news_file.close()
         news_title_file.close()

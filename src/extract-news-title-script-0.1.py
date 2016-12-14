@@ -35,6 +35,8 @@ for subfolder in subfolder_list:
                 continue
             if news_title[-1] not in end_punctuation:
                 news_title += '.\n'
+            else:
+                news_title += '\n'
             reuters_news_file.write(news_date + '\t' + news_title)
 pbar.close()
 reuters_news_file.close()
@@ -58,6 +60,8 @@ for subfolder in subfolder_list:
                 continue
             if news_title[-1] not in end_punctuation:
                 news_title += '.\n'
+            else:
+                news_title += '\n'
             bloomberg_news_file.write(news_date + '\t' + news_title)
 pbar.close()
 bloomberg_news_file.close()
