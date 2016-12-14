@@ -14,6 +14,8 @@ import os
 import glob
 from tqdm import tqdm
 
+end_punctuation = '.?!'
+
 cur_dir = '../data'
 reuters_folder = cur_dir + '/Reuters_news_title_v2'
 bloomberg_folder = cur_dir + '/Bloomberg_news_title_v2'
@@ -39,6 +41,11 @@ for subfolder in subfolder_list:
                 if str == '-- \n':
                     str = f.readline()
                 news_title = str.split('-- ')[-1]
+                news_title = news_title.strip('\n')
+                if  len(news_title) == 0:
+                    continue
+                if news_title[-1] not in end_punctuation:
+                    news_title += '.'
                 title_file.write(news_title)
 pbar.close()
 
@@ -56,5 +63,10 @@ for subfolder in subfolder_list:
                 if str == '-- \n':
                     str = f.readline()
                 news_title = str.split('-- ')[-1]
+                news_title = news_title.strip('\n')
+                if  len(news_title) == 0:
+                    continue
+                if news_title[-1] not in end_punctuation:
+                    news_title += '.'
                 title_file.write(news_title)
 pbar.close()

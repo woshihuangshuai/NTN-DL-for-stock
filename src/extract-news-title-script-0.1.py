@@ -14,6 +14,7 @@ content format:
 import glob
 from tqdm import tqdm
 
+end_punctuation = '.?!'
 
 # extract news in ReutersNews106521
 reuters_news_file = open('../data/ReutersNews106521_news_title.txt', 'w')
@@ -29,6 +30,11 @@ for subfolder in subfolder_list:
             if str == '-- \n':
                 str = f.readline()
             news_title = str.split('-- ')[-1]
+            news_title = news_title.strip('\n')
+            if  len(news_title) == 0:
+                continue
+            if news_title[-1] not in end_punctuation:
+                news_title += '.'
             reuters_news_file.write(news_date + '\t' + news_title)
 pbar.close()
 reuters_news_file.close()
@@ -47,6 +53,11 @@ for subfolder in subfolder_list:
             if str == '-- \n':
                 str = f.readline()
             news_title = str.split('-- ')[-1]
+            news_title = news_title.strip('\n')
+            if  len(news_title) == 0:
+                continue
+            if news_title[-1] not in end_punctuation:
+                news_title += '.'
             bloomberg_news_file.write(news_date + '\t' + news_title)
 pbar.close()
 bloomberg_news_file.close()
