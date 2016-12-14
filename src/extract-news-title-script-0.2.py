@@ -45,7 +45,7 @@ for subfolder in subfolder_list:
                 if  len(news_title) == 0:
                     continue
                 if news_title[-1] not in end_punctuation:
-                    news_title += '.'
+                    news_title += '.\n'
                 title_file.write(news_title)
 pbar.close()
 
@@ -67,6 +67,6 @@ for subfolder in subfolder_list:
                 if  len(news_title) == 0:
                     continue
                 if news_title[-1] not in end_punctuation:
-                    news_title += '.'
+                    news_title += '.\n'
                 title_file.write(news_title)
 pbar.close()

@@ -44,7 +44,7 @@ for date_folder in date_folder_list:
         if  len(news_title) == 0:
             continue
         if news_title[-1] not in end_punctuation:
-            news_title += '.'
+            news_title += '.\n'
         news_title_file.write(news_title)
         news_file.close()
         news_title_file.close()
@@ -71,7 +71,7 @@ for date_folder in date_folder_list:
         if  len(news_title) == 0:
             continue
         if news_title[-1] not in end_punctuation:
-            news_title += '.'
+            news_title += '.\n'
         news_title_file.write(news_title)
         news_file.close()
         news_title_file.close()
