@@ -15,8 +15,8 @@ from tqdm import tqdm
 end_punctuation = '.?!'
 
 cur_dir = '../data'
-reuters_news_title_folder = cur_dir + '/Reuters_news_title_v3'
-bloomberg_news_title_folder = cur_dir + '/Bloomberg_news_title_v3'
+reuters_news_title_folder = cur_dir + '/reuters_news_title_v3'
+bloomberg_news_title_folder = cur_dir + '/bloomberg_news_title_v3'
 
 if os.path.exists(cur_dir) == False:
     os.mkdir(cur_dir)

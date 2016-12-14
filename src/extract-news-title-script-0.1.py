@@ -17,7 +17,7 @@ from tqdm import tqdm
 end_punctuation = '.?!'
 
 # extract news in ReutersNews106521
-reuters_news_file = open('../data/ReutersNews106521_news_title.txt', 'w')
+reuters_news_file = open('../data/reuters_news_title.txt', 'w')
 subfolder_list = glob.glob('../data/ReutersNews106521/*')
 pbar = tqdm(total=len(subfolder_list))
 for subfolder in subfolder_list:
@@ -40,7 +40,7 @@ pbar.close()
 reuters_news_file.close()
 
 # extract news in 20061020_20131126_bloomberg_news
-bloomberg_news_file = open('../data/20061020_20131126_bloomberg_news_news_title.txt', 'w')
+bloomberg_news_file = open('../data/bloomberg_news_title.txt', 'w')
 subfolder_list = glob.glob('../data/20061020_20131126_bloomberg_news/*')
 pbar = tqdm(total=len(subfolder_list))
 for subfolder in subfolder_list:
