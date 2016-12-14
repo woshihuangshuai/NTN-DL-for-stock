@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 
 '''
 extract news' title 
@@ -14,8 +15,8 @@ from tqdm import tqdm
 end_punctuation = '.?!'
 
 cur_dir = '../data'
-reuters_news_title_folder = cur_dir + '/Reuters_news_title'
-bloomberg_news_title_folder = cur_dir + '/Bloomberg_news_title'
+reuters_news_title_folder = cur_dir + '/Reuters_news_title_v3'
+bloomberg_news_title_folder = cur_dir + '/Bloomberg_news_title_v3'
 
 if os.path.exists(cur_dir) == False:
     os.mkdir(cur_dir)

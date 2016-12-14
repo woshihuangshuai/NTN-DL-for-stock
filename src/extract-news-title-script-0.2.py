@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 
 '''
 extract news' title 
@@ -14,8 +15,8 @@ import glob
 from tqdm import tqdm
 
 cur_dir = '../data'
-reuters_folder = cur_dir + '/Reuters_news_title'
-bloomberg_folder = cur_dir + '/Bloomberg_news_title'
+reuters_folder = cur_dir + '/Reuters_news_title_v2'
+bloomberg_folder = cur_dir + '/Bloomberg_news_title_v2'
 
 if os.path.exists(cur_dir) == False:
     os.mkdir(cur_dir)
