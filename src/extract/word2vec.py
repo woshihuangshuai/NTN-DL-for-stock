@@ -12,14 +12,14 @@ import re
 # from tqdm import tqdm
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
  
-resources_dirs = ['../data/ReutersNews106521/*',
-        '../data/20061020_20131126_bloomberg_news/*']
+# resources_dirs = ['../data/ReutersNews106521/*',
+#         '../data/20061020_20131126_bloomberg_news/*']
 
-intab = string.punctuation \
-            + '～！@＃¥％……&＊（）｛｝［］｜、；：‘’“”，。／？《》＝＋－——｀' \
-            + '！‘’“”#￥%（）*+，-。、：；《》=？@【】·~——{|} '
-outtab = ' '*len(intab)
-transtab = string.maketrans(intab, outtab)
+# intab = string.punctuation \
+#             + '～！@＃¥％……&＊（）｛｝［］｜、；：‘’“”，。／？《》＝＋－——｀' \
+#             + '！‘’“”#￥%（）*+，-。、：；《》=？@【】·~——{|} '
+# outtab = ' '*len(intab)
+# transtab = string.maketrans(intab, outtab)
 
 class Mysentences(object):
     """sentences iterator"""
