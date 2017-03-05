@@ -26,12 +26,12 @@ for subfolder in subfolder_list:
     pbar.update(1)
     for txt_file_dir in glob.glob(subfolder + '/*'):
         with open(txt_file_dir, 'r') as f:
-            str  =  f.readline()
+            str = f.readline()
             if str == '-- \n':
                 str = f.readline()
             news_title = str.split('-- ')[-1]
             news_title = news_title.strip('\n')
-            if  len(news_title) == 0:
+            if len(news_title) == 0:
                 continue
             if news_title[-1] not in end_punctuation:
                 news_title += '.\n'
@@ -51,12 +51,12 @@ for subfolder in subfolder_list:
     pbar.update(1)
     for txt_file_dir in glob.glob(subfolder + '/*'):
         with open(txt_file_dir, 'r') as f:
-            str  =  f.readline()
+            str = f.readline()
             if str == '-- \n':
                 str = f.readline()
             news_title = str.split('-- ')[-1]
             news_title = news_title.strip('\n')
-            if  len(news_title) == 0:
+            if len(news_title) == 0:
                 continue
             if news_title[-1] not in end_punctuation:
                 news_title += '.\n'

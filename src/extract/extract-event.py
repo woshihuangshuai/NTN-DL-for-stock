@@ -3,12 +3,11 @@
 
 import re
 
-
 data_resource = ['bloomberg', 'reuters']
 total = 0
 
 for resource in data_resource:
-    reverb_dict = {} # {key, set}
+    reverb_dict = {}  # {key, set}
     zpar_dict = {}
 
     print('Extracting %s...' % resource)
@@ -18,10 +17,10 @@ for resource in data_resource:
         line = reverb_result_file.readline()
         while line:
             items = line.split('\t')
-            arg1        = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
-            relation    = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
-            arg2        = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
-            datetime    = items[12].split()[0]
+            arg1 = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
+            relation = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
+            arg2 = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
+            datetime = items[12].split()[0]
             if re.match(r'[0-9]{8}', datetime) != None:
                 if datetime not in reverb_dict.keys():
                     reverb_dict[datetime] = [(arg1, relation, arg2)]
@@ -31,7 +30,7 @@ for resource in data_resource:
             line = reverb_result_file.readline()
         # print(len(reverb_dict.keys()))
         print('total of (arg1, relation, arg2): %d.' % c)
-    
+
     # extract (sub, predicate, obj)
     with open('../data/%s_zpar_dep_result.txt' % resource, 'r') as zpar_result_file:
         c = 0
@@ -45,7 +44,7 @@ for resource in data_resource:
             else:
                 datetime = ''
                 sub = set()
-                predicate =set()
+                predicate = set()
                 obj = set()
 
                 t = items[0].split('\t')
@@ -53,7 +52,7 @@ for resource in data_resource:
                 del t[0]
                 if t[-1] == 'SUB':
                     sub.add(re.sub(r'[^a-z]+', ' ', t[0]).strip())
-                for i in range(1,len(items)):
+                for i in range(1, len(items)):
                     t = items[i].split('\t')
                     if t[-1] == 'SUB':
                         sub.add(re.sub(r'[^a-z]+', ' ', t[0]).strip())
@@ -61,8 +60,8 @@ for resource in data_resource:
                         predicate.add(re.sub(r'[^a-z]+', ' ', t[0]).strip())
                     elif t[-1] == 'OBJ':
                         obj.add(re.sub(r'[^a-z]+', ' ', t[0]).strip())
-                
-                if datetime != '' and len(sub) != 0 and len(predicate) != 0 and len(obj) != 0:            
+
+                if datetime != '' and len(sub) != 0 and len(predicate) != 0 and len(obj) != 0:
                     if re.match(r'[0-9]{8}', datetime) != None:
                         if datetime not in zpar_dict.keys():
                             zpar_dict[datetime] = [(sub, predicate, obj)]
@@ -127,4 +126,3 @@ for resource in data_resource:
     total += len(event_list)
     print('total of event in %s: %d.' % (resource, len(event_list)))
 print('total of event: %d' % total)
-
