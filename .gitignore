@@ -1,3 +1,4 @@
 /data
 /tools/zpar/dist/english-model/
 *.pyc
+settings.json
