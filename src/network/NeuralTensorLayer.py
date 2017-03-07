@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+'''
+    reference:
+        dense_tesnor, https://github.com/bstriner/dense_tensor;
+        keras-neural-tensor-network, https://github.com/dapurv5/keras-neural-tensor-layer;
+'''
 import scipy.stats as stats
 from keras import backend as K
 from keras import regularizers
