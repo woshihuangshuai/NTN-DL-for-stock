@@ -25,7 +25,7 @@ def get_data():
     return X_train, y_train, X_test, y_test
 
 
-def NeuralTensorNetwork(input_dim=100, output_dim=3):
+def neuralTensorNetwork(input_dim=100, output_dim=3):
     input1 = Input(shape=(input_dim,), dtype='float32')
     input2 = Input(shape=(input_dim,), dtype='float32')
     input3 = Input(shape=(input_dim,), dtype='float32')
@@ -36,7 +36,9 @@ def NeuralTensorNetwork(input_dim=100, output_dim=3):
                             V_regularizer=l2(0.0001), b_regularizer=l2(0.0001))([input2, input3])
     U = NeuralTensorLayer(output_dim=output_dim, input_dim=output_dim, W_regularizer=l2(0.0001),
                           V_regularizer=l2(0.0001), b_regularizer=l2(0.0001))([R_1, R_2])
-    p = Dense(output_dim=1)(U)  # BE CARAFUL!
+
+    p = Dense(output_dim=1)(U)  # this layer is used for training the network.
+
     model = Model(input=[input1, input2, input3], output=[p, U])
     sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss=contrastive_max_margin,
@@ -56,16 +58,18 @@ def main():
     # sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
     # model.compile(loss=contrastive_max_margin, optimizer=sgd)
 
-    model = NeuralTensorNetwork(input_dim=64, output_dim=32)
+    model = neuralTensorNetwork(input_dim=64, output_dim=32)
 
     X_train, Y_train, X_test, Y_test = get_data()
     X_train = X_train.astype(np.float32)
     Y_train = Y_train.astype(np.float32)
     X_test = X_test.astype(np.float32)
     Y_test = Y_test.astype(np.float32)
-    
-    model.fit([X_train, X_train, X_train], [Y_train,Y_train], nb_epoch=50, batch_size=5)
-    score = model.evaluate([X_test, X_test, X_test], [Y_test,Y_test], batch_size=1)
+
+    model.fit([X_train, X_train, X_train], [
+              Y_train, Y_train], nb_epoch=50, batch_size=5)
+    score = model.evaluate([X_test, X_test, X_test], [
+                           Y_test, Y_test], batch_size=1)
     print score
     # print K.get_value(model.layers[2].W)
 
