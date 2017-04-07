@@ -85,6 +85,7 @@ for resource in data_resource:
                         elif (sub, predicate, obj) not in zpar_dict[datetime]:
                             zpar_dict[datetime].append((sub, predicate, obj))
                         c += 1
+
                 items = []
                 line = zpar_result_file.readline()
         # print(len(reverb_dict.keys()))
@@ -110,9 +111,11 @@ for resource in data_resource:
         for item in l:
             s = datetime
             for arg_set in item:
-                s += '\t' + arg_set.pop()
+                pop_item = arg_set.pop()
+                s += '\t' + pop_item
                 for arg in arg_set: 
                     s += ',' + t
+                arg_set.add(pop_item)
             s += '\n'
             f.write(s)
     f.close()
@@ -133,22 +136,25 @@ for resource in data_resource:
                     if sub in i[0] and sub != '':
                         is_in += 1
                         break
+                
                 for predicate in j[1]:
-                    if predicate in i[1] and sub != '':
+                    if predicate in i[1] and predicate != '':
                         is_in += 1
                         break
+                
                 for obj in j[2]:
-                    if obj in i[2] and sub != '':
+                    if obj in i[2] and obj != '':
                         is_in += 1
                         break
+
                 if is_in == 3 and i[0] != '' and i[1] != '' and i[2] != '':
                     event_list.add((key, i[0], i[1], i[2]))
 
     f = open('../../data/result/%s_event_list.txt' % resource, 'w')
     for event in event_list:
         s = event[0]
-        for arg in event[1:-1]:
-            s += '\t' + arg
+        for arg in event[1:]:
+            s += ',' + arg
         f.write(s + '\n')
     f.close()
     total += len(event_list)
