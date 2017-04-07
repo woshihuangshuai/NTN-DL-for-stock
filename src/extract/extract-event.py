@@ -55,7 +55,12 @@ for resource in data_resource:
                 datetime = t[0]
                 del t[0]
 
-                for i in range(0, len(items)):
+                if t[-1] == 'SUB':
+                    item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
+                    if item != '':
+                        sub.add(item)
+
+                for i in range(1, len(items)):
                     t = items[i].split('\t')
 
                     if t[-1] == 'SUB':
