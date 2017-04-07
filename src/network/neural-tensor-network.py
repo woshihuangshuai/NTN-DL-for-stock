@@ -75,4 +75,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    model = neuralTensorNetwork()
+    model.summary()

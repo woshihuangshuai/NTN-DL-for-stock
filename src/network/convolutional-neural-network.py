@@ -3,12 +3,10 @@
 
 
 from keras import backend as K
-from keras.layers import Activation, Dense, Input
-from keras.layers import Conv1D, Conv2D, Permute, MaxPooling2D, MaxPooling1D, Flatten, Reshape
-from keras.layers import Merge
+from keras.layers import (Activation, Conv2D, Dense, Flatten, Input,
+                          MaxPooling2D, Merge, Permute, Reshape)
 from keras.models import Model
 
-input_dim = 10
 
 # short_term_input = U1
 # middle_term_input = [U1 ~ U7]
@@ -59,10 +57,9 @@ def deepPredictionModel(input_dim=3, output_dim=2):
                   optimizer='rmsprop',
                   metrics=['accuracy'])
 
-    model.summary()
-
     return model
 
 
 if __name__ == '__main__':
-    deepPredictionModel(input_dim)
+    model = deepPredictionModel()
+    model.summary()

@@ -11,22 +11,26 @@ for resource in data_resource:
     zpar_dict = {}
 
     print('Extracting %s...' % resource)
+    
     # extract (arg1, rel, arg2)
     with open('../data/%s_reverb_result_v1.txt' % resource, 'r') as reverb_result_file:
         c = 0
         line = reverb_result_file.readline()
         while line:
-            items = line.split('\t')
-            arg1 = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
-            relation = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
-            arg2 = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
-            datetime = items[12].split()[0]
-            if re.match(r'[0-9]{8}', datetime) != None:
-                if datetime not in reverb_dict.keys():
-                    reverb_dict[datetime] = [(arg1, relation, arg2)]
-                elif (arg1, relation, arg2) not in reverb_dict[datetime]:
-                    reverb_dict[datetime].append((arg1, relation, arg2))
-                c += 1
+            items       = line.split('\t')
+            arg1        = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
+            relation    = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
+            arg2        = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
+            datetime    = items[12].split()[0]
+
+            if datetime != '' and arg1 != '' and relation != '' and arg2 != '':
+                if re.match(r'[0-9]{8}', datetime) != None:
+                    if datetime not in reverb_dict.keys():
+                        reverb_dict[datetime] = [(arg1, relation, arg2)]
+                    elif (arg1, relation, arg2) not in reverb_dict[datetime]:
+                        reverb_dict[datetime].append((arg1, relation, arg2))
+                    c += 1
+
             line = reverb_result_file.readline()
         # print(len(reverb_dict.keys()))
         print('total of (arg1, relation, arg2): %d.' % c)
@@ -50,16 +54,24 @@ for resource in data_resource:
                 t = items[0].split('\t')
                 datetime = t[0]
                 del t[0]
-                if t[-1] == 'SUB':
-                    sub.add(re.sub(r'[^a-z]+', ' ', t[0]).strip())
-                for i in range(1, len(items)):
+
+                for i in range(0, len(items)):
                     t = items[i].split('\t')
+
                     if t[-1] == 'SUB':
-                        sub.add(re.sub(r'[^a-z]+', ' ', t[0]).strip())
+                        item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
+                        if item != '':
+                            sub.add(item)
+
                     elif t[-1] == 'ROOT':
-                        predicate.add(re.sub(r'[^a-z]+', ' ', t[0]).strip())
+                        item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
+                        if item != '':
+                            predicate.add(item)
+
                     elif t[-1] == 'OBJ':
-                        obj.add(re.sub(r'[^a-z]+', ' ', t[0]).strip())
+                        item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
+                        if item != '':
+                            obj.add(item)
 
                 if datetime != '' and len(sub) != 0 and len(predicate) != 0 and len(obj) != 0:
                     if re.match(r'[0-9]{8}', datetime) != None:
@@ -79,7 +91,10 @@ for resource in data_resource:
         datetime = key
         l = reverb_dict[key]
         for item in l:
-            s = datetime + '\t' + str(item) + '\n'
+            s = datetime
+            for t in item:
+                s += '\t' + t
+            s += '\n'
             f.write(s)
     f.close()
 
@@ -88,7 +103,12 @@ for resource in data_resource:
         datetime = key
         l = zpar_dict[key]
         for item in l:
-            s = datetime + '\t' + str(item) + '\n'
+            s = datetime
+            for arg_set in item:
+                s += '\t' + arg_set.pop()
+                for arg in arg_set: 
+                    s += ',' + t
+            s += '\n'
             f.write(s)
     f.close()
 
@@ -120,8 +140,11 @@ for resource in data_resource:
                     event_list.add((key, i[0], i[1], i[2]))
 
     f = open('../data/%s_event_list.txt' % resource, 'w')
-    for i in event_list:
-        f.write(str(i) + '\n')
+    for event in event_list:
+        s = event[0]
+        for arg in event[1:-1]:
+            s += '\t' + arg
+        f.write(s + '\n')
     f.close()
     total += len(event_list)
     print('total of event in %s: %d.' % (resource, len(event_list)))
