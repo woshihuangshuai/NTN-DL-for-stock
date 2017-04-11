@@ -20,6 +20,15 @@
 
         卷积、最大池化、分类
 
+## Tools
+
+    ReVerb:
+        java -Xmx512m -jar reverb.jar -h (for more option).
+
+    ZPar:
+        Step 1: english.postagger
+        Step 2: english.depparser
+
 ## Issues
     
     extract-event.py:

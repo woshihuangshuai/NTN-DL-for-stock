@@ -2,3 +2,5 @@
 /tools/zpar/dist/english-model/
 *.pyc
 settings.json
+/.vscode
+tools/zpar/english-models.zip
