@@ -25,7 +25,7 @@ for news_resource in news_resources:
     pbar = tqdm(total=len(folder_list))
 
     for folder in folder_list:
-        pbar.set_description('Extracting %s' % folder)
+        pbar.set_description('Extracting %s' % folder.split('/')[-1])
         pbar.update(1)
 
         for file in glob.glob(folder + '/*'):
