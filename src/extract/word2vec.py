@@ -119,8 +119,7 @@ def event2Vec(model, event_file_list):
 
 
 if __name__ == '__main__':
-
-    event_file_list = ['reuters_event_list.txt']
+    event_file_list = ['bloomberg_event_list.txt', 'reuters_event_list.txt']
     model = getModel()
     if model != None:
         event2Vec(model, event_file_list)

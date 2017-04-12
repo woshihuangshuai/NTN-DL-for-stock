@@ -92,7 +92,7 @@ for resource in data_resource:
         print('total of (sub, predicate, obj): %d.' % c)
 
     # record to file
-    f = open('../../data/result/%s_reverb_extract_result.txt' % resource, 'w')
+    f = open('../../data/event/%s_reverb_extract_result.txt' % resource, 'w')
     for key in reverb_dict.keys():
         datetime = key
         l = reverb_dict[key]
@@ -104,7 +104,7 @@ for resource in data_resource:
             f.write(s)
     f.close()
 
-    f = open('../../data/result/%s_zpar_extract_result.txt' % resource, 'w')
+    f = open('../../data/event/%s_zpar_extract_result.txt' % resource, 'w')
     for key in zpar_dict.keys():
         datetime = key
         l = zpar_dict[key]
@@ -150,7 +150,7 @@ for resource in data_resource:
                 if is_in == 3 and i[0] != '' and i[1] != '' and i[2] != '':
                     event_list.add((key, i[0], i[1], i[2]))
 
-    f = open('../../data/result/%s_event_list.txt' % resource, 'w')
+    f = open('../../data/event/%s_event_list.txt' % resource, 'w')
     for event in event_list:
         s = event[0]
         for arg in event[1:]:
