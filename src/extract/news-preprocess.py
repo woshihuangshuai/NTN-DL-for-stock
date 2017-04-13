@@ -40,7 +40,7 @@ for news_resource in news_resources:
                 content += line.strip('\n')
                 line = raw_news_file.readline()
             news_lines = content.split('. ')
-            print news_lines
+            # print news_lines
             for line in news_lines:
                 processed_news_file.write(line + '. \n')
             
