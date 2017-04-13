@@ -10,7 +10,7 @@ import glob
 from tqdm import tqdm
 
 
-news_resources = ['bloomberg', 'reuters']
+news_resources = ['bloomber', 'reuters']
 news_resources_dir = '../../data/'
 processed_news_dir = '../../data/processed_news/'
 
@@ -32,15 +32,18 @@ for news_resource in news_resources:
             raw_news_file = open(file, 'r')
             processed_news_file = open(save_dir + file.split('/')[-1], 'w')
 
+            content = ''
             for i in range(7):
                 raw_news_file.readline()
-
             line = raw_news_file.readline()
             while line:
-                processed_news_file.write(line.strip('\n'))
+                content += line.strip('\n')
                 line = raw_news_file.readline()
-            processed_news_file.write('\n')
-
+            news_lines = content.split('. ')
+            print news_lines
+            for line in news_lines:
+                processed_news_file.write(line + '. \n')
+            
             raw_news_file.close()
             processed_news_file.close()
 
