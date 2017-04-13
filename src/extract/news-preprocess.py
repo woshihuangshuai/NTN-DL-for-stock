@@ -10,7 +10,7 @@ import glob
 from tqdm import tqdm
 
 
-news_resources = ['bloomber', 'reuters']
+news_resources = ['bloomberg', 'reuters']
 news_resources_dir = '../../data/'
 processed_news_dir = '../../data/processed_news/'
 
