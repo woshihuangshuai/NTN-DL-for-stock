@@ -74,16 +74,14 @@ def event2Vec(model, event_file_list):
                         ]
     '''
 
-    dir_path = '../../data/result/'
     event_embedding_dic = {}
     for file in event_file_list:
-        print 'Transform %s event into event-embedding:' % file
-        with open(dir_path + file, 'r') as event_file:
+        print 'Transforming %s event into event-embedding.' % file
+        with open(file, 'r') as event_file:
             line = event_file.readline()
             while line:
                 event_embedding = []
                 t = line.strip().split(',')
-                print t
                 datetime = t[0]
                 del t[0]
                 if len(t) != 3:
@@ -119,7 +117,9 @@ def event2Vec(model, event_file_list):
 
 
 if __name__ == '__main__':
-    event_file_list = ['bloomberg_event_list.txt', 'reuters_event_list.txt']
+    dir_path = '../../data/event/'
+    file_list = ['bloomberg_event.txt', 'reuters_event.txt']
+    event_file_list = [dir_path + file for file in file_list]
     model = getModel()
     if model != None:
         event2Vec(model, event_file_list)

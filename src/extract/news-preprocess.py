@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 
 news_resources = ['bloomberg', 'reuters']
-news_resources_dir = '../../data/'
+raw_news_dir = '../../data/raw_news/'
 processed_news_dir = '../../data/processed_news/'
 
 
@@ -20,7 +20,7 @@ for news_resource in news_resources:
     if os.path.exists(save_dir) == False:
         os.makedirs(save_dir)
 
-    folder_list = glob.glob(news_resources_dir + '%s' %
+    folder_list = glob.glob(raw_news_dir + '%s' %
                             news_resource + '/*')   # 获取目录下的所有子文件夹
     pbar = tqdm(total=len(folder_list))
 

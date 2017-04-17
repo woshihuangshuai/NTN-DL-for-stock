@@ -16,9 +16,13 @@ from tqdm import tqdm
 
 end_punctuation = '.?!'
 
+raw_news_dir = '../../data/raw_news/'
+news_title_dir = '../../data/news_title/'
+raw_news_folder = ['bloomberg', 'reuters']
+
 # extract news of reuters
-reuters_news_file = open('../../data/reuters_news_title.txt', 'w')
-subfolder_list = glob.glob('../../data/reuters/*')
+reuters_news_file = open(news_title_dir + 'reuters_news_title.txt', 'w')
+subfolder_list = glob.glob(raw_news_dir + 'reuters/*')
 pbar = tqdm(total=len(subfolder_list))
 for subfolder in subfolder_list:
     news_date = subfolder.split('/')[-1]
@@ -42,8 +46,8 @@ pbar.close()
 reuters_news_file.close()
 
 # extract news of bloomberg
-bloomberg_news_file = open('../../data/bloomberg_news_title.txt', 'w')
-subfolder_list = glob.glob('../../data/bloomberg/*')
+bloomberg_news_file = open(news_title_dir + 'bloomberg_news_title.txt', 'w')
+subfolder_list = glob.glob(raw_news_dir + 'bloomberg/*')
 pbar = tqdm(total=len(subfolder_list))
 for subfolder in subfolder_list:
     news_date = ''.join(subfolder.split('/')[-1].split('-'))
