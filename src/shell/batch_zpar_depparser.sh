@@ -1,5 +1,15 @@
-filelist=`find ~/Documents/NTN-DL-for-stock/src/ -type f`
+filelist=`find ../../data/processed_news/zpar/pos -type f`
+save_dir="../../data/processed_news/zpar/dep"
+
+if [ ! -d "../../data/processed_news/zpar" ]; then
+ mkdir ../../data/processed_news/zpar
+fi
+if [ ! -d "../../data/processed_news/zpar/dep" ]; then
+ mkdir ../../data/processed_news/zpar/dep
+fi
+
 for file in $filelist
 do
- java -Xmx512m -jar ~/Documents/NTN-DL-for-stock/tools/reverb/reverb-latest.jar $file
+ filename=${file##*/}
+ echo $save_dir$filename"_zpar_dep"
 done

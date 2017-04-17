@@ -1,8 +1,13 @@
-# filelist=`find ~/Documents/NTN-DL-for-stock/data/processed_news/ -type f`
-filelist=`find ~/Documents/NTN-DL-for-stock/data/bloomberg_and_reuters_news_title/ -type f`
+filelist=`find ../../data/processed_news/ -type f`
+save_dir="../../data/processed_news/reverb/"
+
+if [ ! -d "../../data/processed_news/reverb/" ]; then
+ mkdir ../../data/processed_news/reverb/
+fi
+
 for file in $filelist
 do
- # java -Xmx512m -jar ~/Documents/NTN-DL-for-stock/tools/reverb/reverb-latest.jar $file
  filename=${file##*/}
- echo $filename"aaaaa"
+ echo $save_dir$filename"_reverb"
+#  java -Xmx512m -jar ../../tools/reverb/reverb-latest.jar $save_dir$filename"_reverb"
 done
