@@ -26,6 +26,8 @@ for news_resource in news_resources:
 
     file_idx = 0
     folder_idx = 1
+    if os.path.exists(save_dir + '%d/' % folder_idx) == False:
+        os.makedirs(save_dir + '%d/' % folder_idx)
 
     for folder in folder_list:
         pbar.set_description('Extracting %s' % folder.split('/')[-1])
@@ -33,11 +35,16 @@ for news_resource in news_resources:
 
         for file in glob.glob(folder + '/*'):
             raw_news_file = open(file, 'r')
+
             file_idx += 1
             if file_idx == 20000:
                 file_idx = 0
                 folder_idx += 1
-            processed_news_file = open(save_dir + '%d/' % folder_idx + file.split('/')[-1], 'w')
+                if os.path.exists(save_dir + '%d/' % folder_idx) == False:
+                    os.makedirs(save_dir + '%d/' % folder_idx)
+
+            processed_news_file = open(
+                save_dir + '%d/' % folder_idx + file.split('/')[-1], 'w')
 
             content = ''
             for i in range(7):
@@ -50,7 +57,7 @@ for news_resource in news_resources:
             # print news_lines
             for line in news_lines:
                 processed_news_file.write(line + '. \n')
-            
+
             raw_news_file.close()
             processed_news_file.close()
 
