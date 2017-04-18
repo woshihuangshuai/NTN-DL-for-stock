@@ -24,13 +24,20 @@ for news_resource in news_resources:
                             news_resource + '/*')   # 获取目录下的所有子文件夹
     pbar = tqdm(total=len(folder_list))
 
+    file_idx = 0
+    folder_idx = 1
+
     for folder in folder_list:
         pbar.set_description('Extracting %s' % folder.split('/')[-1])
         pbar.update(1)
 
         for file in glob.glob(folder + '/*'):
             raw_news_file = open(file, 'r')
-            processed_news_file = open(save_dir + file.split('/')[-1], 'w')
+            file_idx += 1
+            if file_idx == 20000:
+                file_idx = 0
+                folder_idx += 1
+            processed_news_file = open(save_dir + '%d/' % folder_idx + file.split('/')[-1], 'w')
 
             content = ''
             for i in range(7):
