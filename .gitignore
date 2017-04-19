@@ -5,3 +5,6 @@ settings.json
 /.vscode
 tools/zpar/english-models.zip
 tools/zpar/english-models/
+src/Icon
+src/.sync/
+
