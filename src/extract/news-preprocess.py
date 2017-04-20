@@ -29,7 +29,7 @@ for news_resource in news_resources:
         if os.path.exists(save_dir) == False:
             os.makedirs(save_dir)
 
-        pbar.set_description('Extracting %s in %s' % (datetime, news_resource))
+        pbar.set_description('Processing %s in %s' % (datetime, news_resource))
         pbar.update(1)
 
         for file in glob.glob(folder + '/*'):

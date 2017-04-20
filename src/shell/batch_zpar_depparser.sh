@@ -7,7 +7,7 @@ if [ ! -d "../../data/zpar/depparser/" ]; then
  mkdir ../../data/zpar/depparser/
 fi
 
-filelist = `find ../../data/zpar/postagger/ -type f`
+filelist=`find ../../data/zpar/postagger/ -type f`
 for file in $filelist
 do
  filename=${file##*/}

@@ -8,81 +8,63 @@
 import re
 import glob
 
-news_folders    = ['bloomberg', 'reuters']
 reverb_dir      = '../../data/reverb/'
-zpar_dir        = '../../data/zpar/'
+zpar_dir        = '../../data/zpar/depparser/'
 save_dir        = '../../data/event/'
 
 reverb_postfix  = '_reverb'
-zpar_postfix    = '_zpar_depparser'
+zpar_postfix    = '_zpar_dep'
 
 total = 0
 count_dic = {}  # 统计从每一对文件中提取的事件的数量
 
-for news_folder in news_folders:
-    file_list = glob.glob(reverb_dir + news_folder + '/*')
-    file_idx_list = []
-    for file in file_list:
-        filename = file.split('/')[-1]
-        file_idx = filename.split('_')[0]
-        file_idx_list.append(file_idx)
-    print file_idx_list
+file_list = glob.glob(reverb_dir + '/*')
+file_idx_list = []
+for file in file_list:
+    filename = file.split('/')[-1]
+    file_idx = filename.split('_')[0]
+    file_idx_list.append(file_idx)
+print file_idx_list
 
-    for file_idx in file_idx_list:
-        print('Extracting %s in %s...' % (file_idx, news_folder))
-        reverb_dict = {}  # {key, set}
-        zpar_dict = {}
+for file_idx in file_idx_list:
+    print('Extracting %s...' % file_idx)
+    reverb_extract_set = set()  # {key, set}
+    zpar_extract_set = set()
 
-        # extract (arg1, rel, arg2) from reverb file
-        with open(reverb_dir + news_folder + '/' + file_idx + reverb_postfix, 'r') as reverb_file:
-            c = 0
+    # extract (arg1, rel, arg2) from reverb file
+    with open(reverb_dir + '/' + file_idx + reverb_postfix, 'r') as reverb_file:
+        c = 0
+        line = reverb_file.readline()
+        while line:
+            items = line.split('\t')
+            arg1        = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
+            relation    = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
+            arg2        = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
+
+            if arg1 != '' and relation != '' and arg2 != '':
+                reverb_extract_set.add((arg1, relation, arg2))
+                c += 1
             line = reverb_file.readline()
-            while line:
-                items       = line.split('\t')
-                arg1        = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
-                relation    = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
-                arg2        = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
+        # print(len(reverb_extract_set))
+        print('Total of (arg1, relation, arg2) in %s: %d.' % (file_idx, c))
 
-                if arg1 != '' and relation != '' and arg2 != '':
-                    if re.match(r'[0-9]{8}', datetime) != None:
-                        if datetime not in reverb_dict.keys():
-                            reverb_dict[datetime] = [(arg1, relation, arg2)]
-                        elif (arg1, relation, arg2) not in reverb_dict[datetime]:
-                            reverb_dict[datetime].append((arg1, relation, arg2))
-                        c += 1
-
-                line = reverb_file.readline()
-            # print(len(reverb_dict.keys()))
-            print('total of (arg1, relation, arg2): %d.' % c)
-
-    # extract (sub, predicate, obj)
-    with open('../../data/%s_zpar_dep_result.txt' % news_folder, 'r') as zpar_result_file:
+    # extract (sub, predicate, obj) from zpar file
+    with open(zpar_dir + '/' + file_idx + zpar_postfix, 'r') as zpar_file:
         c = 0
         items = []
-        line = zpar_result_file.readline()
+        line = zpar_file.readline()
         while line:
             if line != '\n':
                 items.append(line.strip('\n'))
-                line = zpar_result_file.readline()
+                line = zpar_file.readline()
                 continue
             else:
-                datetime = ''
                 sub = set()
                 predicate = set()
                 obj = set()
 
-                t = items[0].split('\t')
-                datetime = t[0]
-                del t[0]
-
-                if t[-1] == 'SUB':
-                    item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
-                    if item != '':
-                        sub.add(item)
-
-                for i in range(1, len(items)):
+                for i in range(0, len(items)):
                     t = items[i].split('\t')
-
                     if t[-1] == 'SUB':
                         item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
                         if item != '':
@@ -97,80 +79,37 @@ for news_folder in news_folders:
                         item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
                         if item != '':
                             obj.add(item)
-
-                if datetime != '' and len(sub) != 0 and len(predicate) != 0 and len(obj) != 0:
-                    if re.match(r'[0-9]{8}', datetime) != None:
-                        if datetime not in zpar_dict.keys():
-                            zpar_dict[datetime] = [(sub, predicate, obj)]
-                        elif (sub, predicate, obj) not in zpar_dict[datetime]:
-                            zpar_dict[datetime].append((sub, predicate, obj))
-                        c += 1
+                if len(sub) != 0 and len(predicate) != 0 and len(obj) != 0:
+                    zpar_extract_set.add((sub, predicate, obj))
+                    c += 1
 
                 items = []
-                line = zpar_result_file.readline()
-        # print(len(reverb_dict.keys()))
-        print('total of (sub, predicate, obj): %d.' % c)
-
-    # record to file
-    f = open('../../data/event/%s_reverb_extract_result.txt' % news_folder, 'w')
-    for key in reverb_dict.keys():
-        datetime = key
-        l = reverb_dict[key]
-        for item in l:
-            s = datetime
-            for t in item:
-                s += '\t' + t
-            s += '\n'
-            f.write(s)
-    f.close()
-
-    f = open('../../data/event/%s_zpar_extract_result.txt' % news_folder, 'w')
-    for key in zpar_dict.keys():
-        datetime = key
-        l = zpar_dict[key]
-        for item in l:
-            s = datetime
-            for arg_set in item:
-                pop_item = arg_set.pop()
-                s += '\t' + pop_item
-                for arg in arg_set:
-                    s += ',' + t
-                arg_set.add(pop_item)
-            s += '\n'
-            f.write(s)
-    f.close()
+                line = zpar_file.readline()
+        # print(len(reverb_extract_set))
+        print('Total of (sub, predicate, obj) in %s: %d.' % (file_idx, c))
 
     # extract event
     event_list = set()
-    for key in reverb_dict.keys():
-        reverb_list = reverb_dict[key]
-        try:
-            zpar_list = zpar_dict[key]
-        except Exception as e:
-            # print 'KEY ERROR: %s.' % e
-            continue
-        for i in reverb_list:
+    for reverb_item in reverb_extract_set:
+        for zpar_item in zpar_extract_set:
             is_in = 0
-            for j in zpar_list:
-                for sub in j[0]:
-                    if sub in i[0] and sub != '':
-                        is_in += 1
-                        break
+            for sub in zpar_item[0]:
+                if sub in reverb_item[0] and sub != '':
+                    is_in += 1
+                    break
+            for predicate in zpar_item[1]:
+                if predicate in reverb_item[1] and predicate != '':
+                    is_in += 1
+                    break
+            for obj in zpar_item[2]:
+                if obj in reverb_item[2] and obj != '':
+                    is_in += 1
+                    break
+            if is_in == 3 and reverb_item[0] != '' and reverb_item[1] != '' and reverb_item[2] != '':
+                event_list.add((reverb_item[0], reverb_item[1], reverb_item[2]))
 
-                for predicate in j[1]:
-                    if predicate in i[1] and predicate != '':
-                        is_in += 1
-                        break
-
-                for obj in j[2]:
-                    if obj in i[2] and obj != '':
-                        is_in += 1
-                        break
-
-                if is_in == 3 and i[0] != '' and i[1] != '' and i[2] != '':
-                    event_list.add((key, i[0], i[1], i[2]))
-
-    f = open('../../data/event/%s_event_list.txt' % news_folder, 'w')
+    # persisitence
+    f = open(save_dir + file_idx, 'w')
     for event in event_list:
         s = event[0]
         for arg in event[1:]:
@@ -178,5 +117,5 @@ for news_folder in news_folders:
         f.write(s + '\n')
     f.close()
     total += len(event_list)
-    print('total of event in %s: %d.' % (news_folder, len(event_list)))
-print('total of event: %d' % total)
+    print('Total of event in %s: %d.' % (file_idx, len(event_list)))
+print('Total of event: %d' % total)
