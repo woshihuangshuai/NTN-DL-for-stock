@@ -10,6 +10,7 @@ import string
 
 import gensim
 import numpy as np
+from tqdm import trange
 
 logging.basicConfig(
     format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -48,7 +49,21 @@ def getModel():
     return model
 
 
-def event2Vec(model, event_file_list, save_dir):
+def event2Vec_NewsTitle():
+    dir_path = '../../data/event/'
+    save_dir = '../../data/event_embedding/news_title/'
+
+    event_file_list = [file for file in glob.glob(
+        news_dir) if len(file.split('/')[-1]) > 8]
+    model = getModel()
+
+    if model != None:
+        event2VecNewsTitle(model, event_file_list, save_dir)
+    else:
+        print 'ERROR: Can\'t get event2vec model!'
+
+
+def event2VecNewsTitle(model, event_file_list, save_dir):
     '''
         file format:
             filename:   datetime
@@ -112,32 +127,78 @@ def event2Vec(model, event_file_list, save_dir):
         np.savez(save_dir + npzfile, event_embedding_dic[datetime])
 
 
-def event2VecAllNews():
+def event2Vec_AllNews():
     news_dir = '../../data/event/*'
     save_dir = '../../data/event_embedding/all_news/'
 
-    event_file_list = [file for file in glob.glob(news_dir) if len(file) == 8]
+    event_file_list = [file for file in glob.glob(
+        news_dir) if len(file.split('/')[-1]) == 8]
     model = getModel()
 
     if model != None:
-        event2Vec(model, event_file_list, save_dir)
+        event2VecAllNews(model, event_file_list, save_dir)
     else:
         print 'ERROR: Can\'t get event2vec model!'
 
 
-def event2VecNewsTitle():
-    dir_path = '../../data/event/'
-    save_dir = '../../data/event_embedding/news_title/'
+def event2VecAllNews(model, event_file_list, save_dir):
+    '''
+        file format:
+            filename:   datetime
+            content:    [ 
+                            [   
+                                [...],
+                                [...],
+                                [...]   # a event-embedding 
+                            ],
 
-    event_file_list = [file for file in glob.glob(news_dir) if len(file) > 8]
-    model = getModel()
+                            [   
+                                [...],
+                                [...],
+                                [...]   # a event-embedding 
+                            ],
 
-    if model != None:
-        event2Vec(model, event_file_list, save_dir)
-    else:
-        print 'ERROR: Can\'t get event2vec model!'
+                            ...
+
+                            # event-embeddings of one day 
+                        ]
+    '''
+    if os.path.exists(save_dir) == False:
+        os.makedirs(save_dir)
+
+    for file_idx in trange(len(event_file_list), desc='Main progress'):
+        file = event_file_list[file_idx]
+        filename = file.split('/')[-1]
+        event_embedding_list = []
+
+        with open(file, 'r') as event_file:
+            lines = event_file.readlines()
+            for line_idx in trange(len(lines), desc='%s' % filename):
+                line = lines[line_idx]
+                event_embedding = []
+                t = line.strip().split(',')
+                if len(t) != 3:
+                    continue
+                for arg in t:
+                    word_list = arg.split()
+                    length = len(word_list)
+                    sum = np.zeros(100)
+                    for word in word_list:
+                        try:
+                            sum += model.wv[word]
+                        except:
+                            continue
+                    mean = sum / length
+                    event_embedding.append(mean)
+                # print event_embedding
+                event_embedding_list.append(event_embedding)
+
+                line = event_file.readline()
+
+        npzfile = filename + '.npz'
+        np.savez(save_dir + npzfile, event_embedding_list)
 
 
 if __name__ == '__main__':
-    event2VecAllNews()
-    event2VecNewsTitle()
+    # event2Vec_NewsTitle()
+    event2Vec_AllNews()
