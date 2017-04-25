@@ -7,13 +7,14 @@
 
 import re
 import glob
+import os
 
 reverb_dir      = '../../data/reverb/'
 zpar_dir        = '../../data/zpar/depparser/'
 save_dir        = '../../data/event/'
 
 reverb_postfix  = '_reverb'
-zpar_postfix    = '_zpar_dep'
+zpar_postfix    = '_zpar_pos_zpar_dep'
 
 total = 0
 count_dic = {}  # 统计从每一对文件中提取的事件的数量
@@ -24,7 +25,7 @@ for file in file_list:
     filename = file.split('/')[-1]
     file_idx = filename.split('_')[0]
     file_idx_list.append(file_idx)
-print file_idx_list
+# print file_idx_list
 
 for file_idx in file_idx_list:
     print('Extracting %s...' % file_idx)
@@ -59,26 +60,35 @@ for file_idx in file_idx_list:
                 line = zpar_file.readline()
                 continue
             else:
-                sub = set()
-                predicate = set()
-                obj = set()
+                sub = ''
+                predicate = ''
+                obj = ''
 
                 for i in range(0, len(items)):
                     t = items[i].split('\t')
                     if t[-1] == 'SUB':
                         item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
                         if item != '':
-                            sub.add(item)
+                            if sub == '':
+                                sub = item
+                            else:
+                                sub = sub + ',' + item
 
                     elif t[-1] == 'ROOT':
                         item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
                         if item != '':
-                            predicate.add(item)
+                            if predicate == '':
+                                predicate = item
+                            else:
+                                predicate = predicate + ',' + item
 
                     elif t[-1] == 'OBJ':
                         item = re.sub(r'[^a-z]+', ' ', t[0].lower()).strip()
                         if item != '':
-                            obj.add(item)
+                            if obj == '':
+                                obj = item
+                            else:
+                                obj = obj + ',' + item
                 if len(sub) != 0 and len(predicate) != 0 and len(obj) != 0:
                     zpar_extract_set.add((sub, predicate, obj))
                     c += 1
@@ -93,15 +103,15 @@ for file_idx in file_idx_list:
     for reverb_item in reverb_extract_set:
         for zpar_item in zpar_extract_set:
             is_in = 0
-            for sub in zpar_item[0]:
+            for sub in zpar_item[0].split(','):
                 if sub in reverb_item[0] and sub != '':
                     is_in += 1
                     break
-            for predicate in zpar_item[1]:
+            for predicate in zpar_item[1].split(','):
                 if predicate in reverb_item[1] and predicate != '':
                     is_in += 1
                     break
-            for obj in zpar_item[2]:
+            for obj in zpar_item[2].split(','):
                 if obj in reverb_item[2] and obj != '':
                     is_in += 1
                     break
@@ -109,6 +119,8 @@ for file_idx in file_idx_list:
                 event_list.add((reverb_item[0], reverb_item[1], reverb_item[2]))
 
     # persisitence
+    if os.path.exists(save_dir) == False:
+        os.makedirs(save_dir)
     f = open(save_dir + file_idx, 'w')
     for event in event_list:
         s = event[0]
@@ -118,4 +130,5 @@ for file_idx in file_idx_list:
     f.close()
     total += len(event_list)
     print('Total of event in %s: %d.' % (file_idx, len(event_list)))
-print('Total of event: %d' % total)
+    print('Total of event: %d' % total)
+# print('Total of event: %d' % total)

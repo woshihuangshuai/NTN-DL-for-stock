@@ -11,23 +11,20 @@ import string
 import gensim
 import numpy as np
 
-
 logging.basicConfig(
     format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
-resources_dirs = ['../../data/ReutersNews106521/*',
-                  '../../data/20061020_20131126_bloomberg_news/*']
 
 
 class Mysentences(object):
     """sentences iterator"""
 
-    def __init__(self, dirs):
-        self.dirs = dirs
+    def __init__(self):
+        self.news_dir = '../../data/raw_news/'
+        self.news_folders = ['bloomberg', 'reuters']
 
     def __iter__(self):
-        for dir in self.dirs:
-            for sub_dir in glob.glob(dir):
+        for folder in self.news_folders:
+            for sub_dir in glob.glob(self.news_dir + folder + '/*'):
                 for txt in glob.glob(sub_dir + '/*'):
                     f = open(txt, 'r')
                     line = f.readline()
@@ -45,13 +42,13 @@ def getModel():
     if os.path.exists('../../data/sg_model/sg_model'):
         model = gensim.models.Word2Vec.load('../../data/sg_model/sg_model')
     else:
-        sentences = Mysentences(resources_dirs)
+        sentences = Mysentences()
         model = gensim.models.Word2Vec(sentences, size=100, min_count=1, sg=1)
         model.save('../../data/sg_model')
     return model
 
 
-def event2Vec(model, event_file_list):
+def event2Vec(model, event_file_list, save_dir):
     '''
         file format:
             filename:   datetime
@@ -109,17 +106,38 @@ def event2Vec(model, event_file_list):
     # persistence
     print 'persisting...'
     for datetime in event_embedding_dic.keys():
-        dir_path = '../../data/event_embedding/'
-        if os.path.exists(dir_path) == False:
-            os.makedirs(dir_path)
+        if os.path.exists(save_dir) == False:
+            os.makedirs(save_dir)
         npzfile = datetime + '.npz'
-        np.savez(dir_path + npzfile, event_embedding_dic[datetime])
+        np.savez(save_dir + npzfile, event_embedding_dic[datetime])
+
+
+def event2VecAllNews():
+    news_dir = '../../data/event/*'
+    save_dir = '../../data/event_embedding/all_news/'
+
+    event_file_list = [file for file in glob.glob(news_dir) if len(file) == 8]
+    model = getModel()
+
+    if model != None:
+        event2Vec(model, event_file_list, save_dir)
+    else:
+        print 'ERROR: Can\'t get event2vec model!'
+
+
+def event2VecNewsTitle():
+    dir_path = '../../data/event/'
+    save_dir = '../../data/event_embedding/news_title/'
+
+    event_file_list = [file for file in glob.glob(news_dir) if len(file) > 8]
+    model = getModel()
+
+    if model != None:
+        event2Vec(model, event_file_list, save_dir)
+    else:
+        print 'ERROR: Can\'t get event2vec model!'
 
 
 if __name__ == '__main__':
-    dir_path = '../../data/event/'
-    file_list = ['bloomberg_event.txt', 'reuters_event.txt']
-    event_file_list = [dir_path + file for file in file_list]
-    model = getModel()
-    if model != None:
-        event2Vec(model, event_file_list)
+    event2VecAllNews()
+    event2VecNewsTitle()
