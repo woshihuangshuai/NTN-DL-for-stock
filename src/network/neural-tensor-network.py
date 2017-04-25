@@ -26,20 +26,28 @@ def get_data():
 
 
 def neuralTensorNetwork(input_dim=100, output_dim=3):
+    # input layer
     input1 = Input(shape=(input_dim,), dtype='float32')
     input2 = Input(shape=(input_dim,), dtype='float32')
     input3 = Input(shape=(input_dim,), dtype='float32')
 
+    # connect arg1 and relation
     R_1 = NeuralTensorLayer(output_dim=output_dim, input_dim=input_dim, W_regularizer=l2(0.0001),
                             V_regularizer=l2(0.0001), b_regularizer=l2(0.0001))([input1, input2])
+
+    # connect relation and arg2
     R_2 = NeuralTensorLayer(output_dim=output_dim, input_dim=input_dim, W_regularizer=l2(0.0001),
                             V_regularizer=l2(0.0001), b_regularizer=l2(0.0001))([input2, input3])
+
+    # U layer is used for predict.
     U = NeuralTensorLayer(output_dim=output_dim, input_dim=output_dim, W_regularizer=l2(0.0001),
                           V_regularizer=l2(0.0001), b_regularizer=l2(0.0001))([R_1, R_2])
 
-    p = Dense(output_dim=1)(U)  # this layer is used for training the network.
+    # p layer is used for training the network.
+    p = Dense(output_dim=1)(U)
 
     model = Model(input=[input1, input2, input3], output=[p, U])
+
     sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss=contrastive_max_margin,
                   optimizer=sgd, loss_weights=[1., 0.])
