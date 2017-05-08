@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
+import os
+import glob
 import math
 
 import numpy as np
@@ -10,20 +12,35 @@ from keras.models import Model
 from keras.objectives import hinge
 from keras.optimizers import SGD
 from keras.regularizers import l2
-from sklearn.datasets import load_digits
 
 from NeuralTensorLayer import NeuralTensorLayer, contrastive_max_margin
 
 
-def get_data():
-    digits = load_digits()
-    L = int(math.floor(digits.data.shape[0] * 0.15))
-    X_train = digits.data[:L]
-    y_train = digits.target[:L]
-    X_test = digits.data[L + 1:]
-    y_test = digits.target[L + 1:]
-    return X_train, y_train, X_test, y_test
+class TrainDataGenerator(object):
 
+    def __init__(self):
+        self.news_title_EM_dir = '../../data/event_embedding/news_title/'
+        self.all_news_EM_dir = '../../data/event_embedding/all_news/'
+
+    def __iter__(self):
+        for file in glob.glob(self.all_news_EM_dir + '*'):
+            filename = file.split('/')[-1]
+            all_news_EM = np.load(file)
+            input1 = [em[0] for em in all_news_EM]
+            input2 = [em[1] for em in all_news_EM]
+            input3 = [em[2] for em in all_news_EM]
+
+            if os.path.exists(self.news_title_EM_dir + filename) == True:
+                news_title_EM = np.load(self.news_title_EM_dir + filename)
+                input1_extend = [em[0] for em in news_title_EM]
+                input2_extend = [em[1] for em in news_title_EM]
+                input3_extend = [em[2] for em in news_title_EM]
+                input1.extend(input1_extend)
+                input2.extend(input2_extend)
+                input3.extend(input3_extend)
+
+            yield input1, input2, input3
+        
 
 def neuralTensorNetwork(input_dim=100, output_dim=3):
     # input layer
@@ -55,18 +72,7 @@ def neuralTensorNetwork(input_dim=100, output_dim=3):
 
 
 def main():
-    input1 = Input(shape=(64,), dtype='float32')
-    input2 = Input(shape=(64,), dtype='float32')
-    input3 = Input(shape=(64,), dtype='float32')
-
-    # NTN = NeuralTensorLayer(output_dim=32, input_dim=64, W_regularizer=l2(0.0001),
-    #                         V_regularizer=l2(0.0001), b_regularizer=l2(0.0001))([input1, input2])
-    # p = Dense(output_dim=1)(NTN)
-    # model = Model(input=[input1, input2], output=[p])
-    # sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
-    # model.compile(loss=contrastive_max_margin, optimizer=sgd)
-
-    model = neuralTensorNetwork(input_dim=64, output_dim=32)
+    model = neuralTensorNetwork(input_dim=100, output_dim=5)
 
     X_train, Y_train, X_test, Y_test = get_data()
     X_train = X_train.astype(np.float32)
@@ -83,5 +89,17 @@ def main():
 
 
 if __name__ == '__main__':
+    '''
+        第一次训练的label如何产生：    1、使用随机初始化的网络进行一次predict
+                                   2、使用随机值
+
+        train_on_batch
+        predict_on_batch
+    '''
+
     model = neuralTensorNetwork()
     model.summary()
+
+    dataGenerator = TrainDataGenerator()
+    for input1, input2, input3 in dataGenerator:
+        print len(input1[0]), len(input2[0]), len(input3[0])

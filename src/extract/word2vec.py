@@ -50,11 +50,11 @@ def getModel():
 
 
 def event2Vec_NewsTitle():
-    dir_path = '../../data/event/'
+    print 'Transforming news title event to event_embedding.'
+    dir_path = '../../data/news_title/event/*'
     save_dir = '../../data/event_embedding/news_title/'
 
-    event_file_list = [file for file in glob.glob(
-        news_dir) if len(file.split('/')[-1]) > 8]
+    event_file_list = [file for file in glob.glob(dir_path)]
     model = getModel()
 
     if model != None:
@@ -66,7 +66,7 @@ def event2Vec_NewsTitle():
 def event2VecNewsTitle(model, event_file_list, save_dir):
     '''
         file format:
-            filename:   datetime
+            filename:   <datetime>.npz
             content:    [ 
                             [   
                                 [...],
@@ -123,11 +123,12 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
     for datetime in event_embedding_dic.keys():
         if os.path.exists(save_dir) == False:
             os.makedirs(save_dir)
-        npzfile = datetime + '.npz'
-        np.savez(save_dir + npzfile, event_embedding_dic[datetime])
+        npzfile = datetime + '.npy'
+        np.save(save_dir + npzfile, event_embedding_dic[datetime])
 
 
 def event2Vec_AllNews():
+    print 'Transforming all news event to event_embedding.'
     news_dir = '../../data/event/*'
     save_dir = '../../data/event_embedding/all_news/'
 
@@ -144,7 +145,7 @@ def event2Vec_AllNews():
 def event2VecAllNews(model, event_file_list, save_dir):
     '''
         file format:
-            filename:   datetime
+            filename:   <datetime>.npz
             content:    [ 
                             [   
                                 [...],
@@ -195,10 +196,10 @@ def event2VecAllNews(model, event_file_list, save_dir):
 
                 line = event_file.readline()
 
-        npzfile = filename + '.npz'
-        np.savez(save_dir + npzfile, event_embedding_list)
+        npzfile = filename + '.npy'
+        np.save(save_dir + npzfile, event_embedding_list)
 
 
 if __name__ == '__main__':
-    # event2Vec_NewsTitle()
+    event2Vec_NewsTitle()
     event2Vec_AllNews()

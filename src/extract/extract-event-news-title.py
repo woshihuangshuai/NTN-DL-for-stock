@@ -5,7 +5,7 @@ import re
 import os
 
 data_dir = '../../data/news_title/'
-save_dir = '../../data/event/'
+save_dir = '../../data/news_title/event/'
 data_resource = ['bloomberg', 'reuters']
 
 total = 0
