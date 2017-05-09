@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import os
 import glob
 import math
+import os
+import random
 
 import numpy as np
 from keras import backend as K
@@ -40,7 +41,7 @@ class TrainDataGenerator(object):
                 input3.extend(input3_extend)
 
             yield input1, input2, input3
-        
+
 
 def neuralTensorNetwork(input_dim=100, output_dim=3):
     # input layer
@@ -71,23 +72,6 @@ def neuralTensorNetwork(input_dim=100, output_dim=3):
     return model
 
 
-def main():
-    model = neuralTensorNetwork(input_dim=100, output_dim=5)
-
-    X_train, Y_train, X_test, Y_test = get_data()
-    X_train = X_train.astype(np.float32)
-    Y_train = Y_train.astype(np.float32)
-    X_test = X_test.astype(np.float32)
-    Y_test = Y_test.astype(np.float32)
-
-    model.fit([X_train, X_train, X_train], [
-              Y_train, Y_train], nb_epoch=50, batch_size=5)
-    score = model.evaluate([X_test, X_test, X_test], [
-                           Y_test, Y_test], batch_size=1)
-    print score
-    # print K.get_value(model.layers[2].W)
-
-
 if __name__ == '__main__':
     '''
         第一次训练的label如何产生：    1、使用随机初始化的网络进行一次predict
@@ -95,11 +79,18 @@ if __name__ == '__main__':
 
         train_on_batch
         predict_on_batch
+
+        用**正确**的event-embedding产生lable
+        用**错误**的event-embedding和lable训练网络
     '''
 
     model = neuralTensorNetwork()
     model.summary()
-
+    
     dataGenerator = TrainDataGenerator()
     for input1, input2, input3 in dataGenerator:
-        print len(input1[0]), len(input2[0]), len(input3[0])
+        label = model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
+        random.shuffle(input1)
+        model.train_on_batch([np.array(input1), np.array(input2), np.array(input3)], label)
+
+    print model.get_weights()
