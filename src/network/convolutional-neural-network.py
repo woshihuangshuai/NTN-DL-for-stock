@@ -60,6 +60,10 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     return model
 
 
+def trainCNN(model):
+
+
+
 if __name__ == '__main__':
     model = deepPredictionModel()
     model.summary()

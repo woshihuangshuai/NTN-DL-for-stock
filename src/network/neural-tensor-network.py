@@ -72,6 +72,16 @@ def neuralTensorNetwork(input_dim=100, output_dim=3):
     return model
 
 
+def trainNTN(model):
+    dataGenerator = TrainDataGenerator()
+    for input1, input2, input3 in dataGenerator:
+        label = model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
+        random.shuffle(input1)
+        model.train_on_batch([np.array(input1), np.array(input2), np.array(input3)], label)
+
+    print model.get_weights()
+    
+
 if __name__ == '__main__':
     '''
         第一次训练的label如何产生：    1、使用随机初始化的网络进行一次predict
