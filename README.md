@@ -1,5 +1,13 @@
 # NTN-DL-for-stock
 
+## 三方库
+
+    keras 1？ 2？
+    tqdm
+    gensim
+    numpy
+    scipy
+
 ## Description
 
     extract-event：
@@ -30,7 +38,7 @@
         Step 2: english.depparser
 
 ## Issues
-    
+
     extract-event.py:
         zpar的提取结果中大量不完整单词，提取代码有问题，需要修复。
 
