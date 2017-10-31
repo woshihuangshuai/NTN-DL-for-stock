@@ -8,6 +8,15 @@
     numpy
     scipy
 
+## Data
+### 新闻数据
+来源：Bloomberg & Reuters （Ding的论文）<br>
+时间范围： 20061020 ～ 20131126 （2595天，其中1786个交易日）
+
+### 股票价格数据
+来源：https://cn.investing.com/indices/us-spx-500-historical-data<br>
+时间范围： 20061020 ～ 20131126 （2595天，其中1786个交易日）
+
 ## Description
 
     extract-event：
