@@ -12,6 +12,18 @@ from keras.models import Model
 # middle_term_input = [U1 ~ U7]
 # long_term_input = [U1 ~ U30]
 
+class DataGenerator(object):
+    '''
+        Event-embedding数据:
+        股票走势label:
+    '''
+    def __init__(self):
+
+    def __iter__(self):
+
+    def get_data(self):
+
+        
 
 def deepPredictionModel(input_dim=3, output_dim=2):
     '''return a deep prediction model(CNN)'''
@@ -61,7 +73,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
 
 
 def trainCNN(model):
-
+    
 
 
 if __name__ == '__main__':
