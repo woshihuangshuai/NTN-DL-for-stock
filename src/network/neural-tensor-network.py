@@ -22,6 +22,7 @@ class TrainDataGenerator(object):
     def __init__(self):
         self.news_title_EM_dir = '../../data/event_embedding/news_title/'
         self.all_news_EM_dir = '../../data/event_embedding/all_news/'
+        self.time_period = []
 
     def __iter__(self):
         for file in glob.glob(self.all_news_EM_dir + '*'):
@@ -40,7 +41,11 @@ class TrainDataGenerator(object):
                 input2.extend(input2_extend)
                 input3.extend(input3_extend)
 
-            yield input1, input2, input3
+            self.time_period.append(filename.split('.')[0])
+            yield input1, input2, input3  # input1中每一条数据包含了从当天的新闻标题和新闻正文中提取到的所有时间
+
+    def get_time_period(self):
+        return self.time_period
 
 
 def neuralTensorNetwork(input_dim=100, output_dim=3):
@@ -75,12 +80,14 @@ def neuralTensorNetwork(input_dim=100, output_dim=3):
 def trainNTN(model):
     dataGenerator = TrainDataGenerator()
     for input1, input2, input3 in dataGenerator:
-        label = model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
+        label = model.predict_on_batch(
+            [np.array(input1), np.array(input2), np.array(input3)])
         random.shuffle(input1)
-        model.train_on_batch([np.array(input1), np.array(input2), np.array(input3)], label)
+        model.train_on_batch(
+            [np.array(input1), np.array(input2), np.array(input3)], label)
 
     print model.get_weights()
-    
+
 
 if __name__ == '__main__':
     '''
@@ -96,11 +103,20 @@ if __name__ == '__main__':
 
     model = neuralTensorNetwork()
     model.summary()
-    
+
     dataGenerator = TrainDataGenerator()
     for input1, input2, input3 in dataGenerator:
-        label = model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
+        label = model.predict_on_batch(
+            [np.array(input1), np.array(input2), np.array(input3)])
         random.shuffle(input1)
-        model.train_on_batch([np.array(input1), np.array(input2), np.array(input3)], label)
-
+        model.train_on_batch(
+            [np.array(input1), np.array(input2), np.array(input3)], label)
     print model.get_weights()
+
+    time_period = dataGenerator.get_time_period()
+    time_idx = 0
+    for input1, input2, input3 in dataGenerator:
+        label = model.predict_on_batch(
+            [np.array(input1), np.array(input2), np.array(input3)])
+        print time_period[time_idx], label
+        time_idx += 1
