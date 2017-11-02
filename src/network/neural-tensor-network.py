@@ -101,6 +101,8 @@ if __name__ == '__main__':
         用**错误**的event-embedding和lable训练网络
     '''
 
+    ntn_result_file_dir = '../../data/ntn_result'
+
     model = neuralTensorNetwork()
     model.summary()
 
@@ -115,8 +117,15 @@ if __name__ == '__main__':
 
     time_period = dataGenerator.get_time_period()
     time_idx = 0
-    for input1, input2, input3 in dataGenerator:
-        label = model.predict_on_batch(
-            [np.array(input1), np.array(input2), np.array(input3)])
-        print time_period[time_idx], label
-        time_idx += 1
+    with open(ntn_result_file_dir, 'w') as ntn_result_file:
+        for input1, input2, input3 in dataGenerator:
+            label = model.predict_on_batch(
+                [np.array(input1), np.array(input2), np.array(input3)])
+            
+            result = np.mean(label[1])
+            result = (result - result.min()) / (result.max() - result.min()) # 归一化
+            ntn_result_file.write(time_period[time_idx])
+            for i in result.tolist():
+                ntn_result_file.write(' ')    
+                ntn_result_file.write(i)
+            time_idx += 1
