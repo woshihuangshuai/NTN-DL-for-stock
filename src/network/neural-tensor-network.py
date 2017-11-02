@@ -103,7 +103,7 @@ if __name__ == '__main__':
     model = neuralTensorNetwork()
     model.summary()
     dataGenerator = TrainDataGenerator()
-    for input1, input2, input3 in dataGenerator:
+    for date_time, input1, input2, input3 in dataGenerator:
         label = model.predict_on_batch(
             [np.array(input1), np.array(input2), np.array(input3)])
         random.shuffle(input1)
