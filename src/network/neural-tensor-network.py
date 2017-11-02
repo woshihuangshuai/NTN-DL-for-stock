@@ -42,7 +42,7 @@ class TrainDataGenerator(object):
                 input3.extend(input3_extend)
 
             self.time_period.append(filename.split('.')[0])
-            yield input1, input2, input3  # input1中每一条数据包含了从当天的新闻标题和新闻正文中提取到的所有时间
+            yield input1, input2, input3  # 每次生成的input中包含了从当天的新闻标题和新闻正文中提取到的所有事件
 
     def get_time_period(self):
         return self.time_period
@@ -99,13 +99,12 @@ if __name__ == '__main__':
 
         用**正确**的event-embedding产生lable
         用**错误**的event-embedding和lable训练网络
+
+        输出结果： p层的输出：为了训练而添加的层
+                 U层的输出：神经张量网络输出的结果
     '''
-
-    ntn_result_file_dir = '../../data/ntn_result'
-
     model = neuralTensorNetwork()
     model.summary()
-
     dataGenerator = TrainDataGenerator()
     for input1, input2, input3 in dataGenerator:
         label = model.predict_on_batch(
@@ -116,16 +115,21 @@ if __name__ == '__main__':
     print model.get_weights()
 
     time_period = dataGenerator.get_time_period()
-    time_idx = 0
+    result_list = []
+    for input1, input2, input3 in dataGenerator:
+        label = model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
+        result = np.mean(label[1], axis=0)
+        result_list.append(result.tolist())
+
+    result_array = np.array(result_list)
+    result_array = (result_array - result_array.min())/(result_array.max() - result_array.min()) # 结果归一化
+    result_list = result_array.tolist()
+
+    ntn_result_file_dir = '../../data/ntn_result'
     with open(ntn_result_file_dir, 'w') as ntn_result_file:
-        for input1, input2, input3 in dataGenerator:
-            label = model.predict_on_batch(
-                [np.array(input1), np.array(input2), np.array(input3)])
-            
-            result = np.mean(label[1])
-            result = (result - result.min()) / (result.max() - result.min()) # 归一化
-            ntn_result_file.write(time_period[time_idx])
-            for i in result.tolist():
-                ntn_result_file.write(' ')    
-                ntn_result_file.write(i)
-            time_idx += 1
+        for date, result in zip(time_period, result_list):
+            ntn_result_file.write(date)
+            for item in result:
+                ntn_result_file.write(' ')
+                ntn_result_file.write(item)
+            ntn_result_file.write('/n')
