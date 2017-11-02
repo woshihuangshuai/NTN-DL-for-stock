@@ -22,7 +22,7 @@ class TrainDataGenerator(object):
     def __init__(self):
         self.news_title_EM_dir = '../../data/event_embedding/news_title/'
         self.all_news_EM_dir = '../../data/event_embedding/all_news/'
-        self.time_period = []
+
 
     def __iter__(self):
         for file in glob.glob(self.all_news_EM_dir + '*'):
@@ -41,11 +41,8 @@ class TrainDataGenerator(object):
                 input2.extend(input2_extend)
                 input3.extend(input3_extend)
 
-            self.time_period.append(filename.split('.')[0])
-            yield input1, input2, input3  # 每次生成的input中包含了从当天的新闻标题和新闻正文中提取到的所有事件
-
-    def get_time_period(self):
-        return self.time_period
+            date_time = filename.split('.')[0]
+            yield date_time, input1, input2, input3  # 每次生成的input中包含了从当天的新闻标题和新闻正文中提取到的所有事件
 
 
 def neuralTensorNetwork(input_dim=100, output_dim=3):
@@ -114,23 +111,23 @@ if __name__ == '__main__':
             [np.array(input1), np.array(input2), np.array(input3)], label)
     # print model.get_weights()
 
+    date_list = []
     result_list = []
-    for input1, input2, input3 in dataGenerator:
+    for date_time, input1, input2, input3 in dataGenerator:
         label = model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
         result = np.mean(label[1], axis=0)
         result_list.append(result.tolist())
+        date_list.append(date_time)
 
     result_array = np.array(result_list)
     result_array = (result_array - result_array.min(axis=0))/(result_array.max(axis=0) - result_array.min(axis=0)) # 结果归一化
     result_list = result_array.tolist()
 
-    time_period = dataGenerator.get_time_period()
-
     ntn_result_file_dir = '../../data/ntn_result'
     with open(ntn_result_file_dir, 'w') as ntn_result_file:
-        for date, result in zip(time_period, result_list):
+        for date, result in zip(date_list, result_list):
             ntn_result_file.write(date)
             for item in result:
                 ntn_result_file.write(' ')
-                ntn_result_file.write(item)
-            ntn_result_file.write('/n')
+                ntn_result_file.write(str(item))
+            ntn_result_file.write('\n')
