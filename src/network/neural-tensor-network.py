@@ -112,9 +112,8 @@ if __name__ == '__main__':
         random.shuffle(input1)
         model.train_on_batch(
             [np.array(input1), np.array(input2), np.array(input3)], label)
-    print model.get_weights()
+    # print model.get_weights()
 
-    time_period = dataGenerator.get_time_period()
     result_list = []
     for input1, input2, input3 in dataGenerator:
         label = model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
@@ -122,8 +121,10 @@ if __name__ == '__main__':
         result_list.append(result.tolist())
 
     result_array = np.array(result_list)
-    result_array = (result_array - result_array.min())/(result_array.max() - result_array.min()) # 结果归一化
+    result_array = (result_array - result_array.min(axis=0))/(result_array.max(axis=0) - result_array.min(axis=0)) # 结果归一化
     result_list = result_array.tolist()
+
+    time_period = dataGenerator.get_time_period()
 
     ntn_result_file_dir = '../../data/ntn_result'
     with open(ntn_result_file_dir, 'w') as ntn_result_file:
