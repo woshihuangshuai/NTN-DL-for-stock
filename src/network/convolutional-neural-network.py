@@ -3,7 +3,7 @@
 
 
 import datetime
-
+import csv
 from keras import backend as K
 from keras.layers import (Activation, Conv2D, Dense, Flatten, Input,
                           MaxPooling2D, Merge, Permute, Reshape)
@@ -15,7 +15,6 @@ from keras.models import Model
     long_term_input = [U1 ~ U30]
 '''
 
-
 class DataGenerator(object):
     '''
         Event-embedding数据:
@@ -23,7 +22,7 @@ class DataGenerator(object):
     '''
     def __init__(self):
         self.ntn_result_file_dir = '../../data/ntn_result'
-        self.historical_stock_data_file_dir = '../../data/美国标准普尔500指数 历史数据.csv'
+        self.historical_stock_data_file_dir = '../../data/SP500.csv'
         self.ntn_result = {} # ntn网络产生的中间结果
         self.stock_trend = {} # 每天的股票价格趋势
         self.date_period = 30 # 时间周期
@@ -39,12 +38,10 @@ class DataGenerator(object):
         start_date = datetime.datetime.strptime(
             min_date, '%Y%m%d') + datetime.timedelta(days=self.date_period)
         start_date = start_date.strftime('%Y%m%d')
-
         for date_time_str in self.stock_trend.keys():
             if date_time_str < start_date:
                 continue
             self.date_list.append(date_time_str)
-
             thirty_days_EM = []
             current_date = datetime.datetime.strptime(date_time_str, '%Y%m%d')
             for i in range(self.date_period):
@@ -55,7 +52,7 @@ class DataGenerator(object):
                     thirty_days_EM.append([0.0, 0.0, 0.0])
             self.input.append(thirty_days_EM)
             self.label.append(self.stock_trend[date_time_str])
-            return self.date_list, self.input, self.label
+        return self.date_list, self.input, self.label
 
     def parse_date_file(self):
         with open(self.ntn_result_file_dir, 'r') as ntn_result_file:
@@ -65,17 +62,18 @@ class DataGenerator(object):
                 self.ntn_result[items[0]] = [float(items[1]), float(items[2]), float(items[3])]
                 line = ntn_result_file.readline()
         with open(self.historical_stock_data_file_dir, 'r') as historical_stock_data_file:
-            line = historical_stock_data_file.readline()
-            line = historical_stock_data_file.readline()
+            historical_stock_data_csv_file = csv.reader(historical_stock_data_file)
+            header = historical_stock_data_csv_file.next()
+            line = historical_stock_data_csv_file.next()
             while line:
-                items = line.split(',')
-                date_time = datetime.datetime.strptime(items[0], '%Y年%m月%d日').strftime('%Y%m%d')
-                closing_price = float(items[1])
+                date_time = datetime.datetime.strptime(line[0], '%Y-%m-%d').strftime('%Y%m%d')
+                closing_price = float(line[-3])
                 # 前一天的价格
-                line = historical_stock_data_file.readline()
-                if line is None:
+                try:
+                    line = historical_stock_data_csv_file.next()
+                except StopIteration:
                     break
-                the_day_before_closing_price = float(line.split(',')[1])
+                the_day_before_closing_price = float(line[-3])
                 trend = [1, 0] if closing_price > the_day_before_closing_price else [0, 1]
                 self.stock_trend[date_time] = trend                           
 
