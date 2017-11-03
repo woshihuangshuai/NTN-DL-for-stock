@@ -2,12 +2,15 @@
 # -*- coding: utf-8 -*-
 
 
-import datetime
 import csv
+import datetime
+
+import numpy as np
 from keras import backend as K
 from keras.layers import (Activation, Conv2D, Dense, Flatten, Input,
                           MaxPooling2D, Merge, Permute, Reshape)
 from keras.models import Model
+
 
 '''
     short_term_input = U1
@@ -15,21 +18,23 @@ from keras.models import Model
     long_term_input = [U1 ~ U30]
 '''
 
+
 class DataGenerator(object):
     '''
         Event-embedding数据:
         股票走势label:
     '''
+
     def __init__(self):
         self.ntn_result_file_dir = '../../data/ntn_result'
         self.historical_stock_data_file_dir = '../../data/SP500.csv'
-        self.ntn_result = {} # ntn网络产生的中间结果
-        self.stock_trend = {} # 每天的股票价格趋势
-        self.date_period = 30 # 时间周期
+        self.ntn_result = {}  # ntn网络产生的中间结果
+        self.stock_trend = {}  # 每天的股票价格趋势
+        self.date_period = 30  # 时间周期
         # 下面三个列表中的元素已有对应
-        self.date_list = [] # 日期列表
-        self.input = [] # 输入数据
-        self.label = [] # 标签
+        self.date_list = []  # 日期列表
+        self.input = []  # 输入数据
+        self.label = []  # 标签
 
     def get_data(self):
         self.parse_date_file()
@@ -45,7 +50,8 @@ class DataGenerator(object):
             thirty_days_EM = []
             current_date = datetime.datetime.strptime(date_time_str, '%Y%m%d')
             for i in range(self.date_period):
-                date_idx = (current_date - datetime.timedelta(days=(i+1))).strftime('%Y%m%d')
+                date_idx = (
+                    current_date - datetime.timedelta(days=(i + 1))).strftime('%Y%m%d')
                 if date_idx in self.ntn_result.keys():
                     thirty_days_EM.append(self.ntn_result[date_idx])
                 else:
@@ -59,14 +65,17 @@ class DataGenerator(object):
             line = ntn_result_file.readline()
             while line:
                 items = line.split()
-                self.ntn_result[items[0]] = [float(items[1]), float(items[2]), float(items[3])]
+                self.ntn_result[items[0]] = [
+                    float(items[1]), float(items[2]), float(items[3])]
                 line = ntn_result_file.readline()
         with open(self.historical_stock_data_file_dir, 'r') as historical_stock_data_file:
-            historical_stock_data_csv_file = csv.reader(historical_stock_data_file)
+            historical_stock_data_csv_file = csv.reader(
+                historical_stock_data_file)
             header = historical_stock_data_csv_file.next()
             line = historical_stock_data_csv_file.next()
             while line:
-                date_time = datetime.datetime.strptime(line[0], '%Y-%m-%d').strftime('%Y%m%d')
+                date_time = datetime.datetime.strptime(
+                    line[0], '%Y-%m-%d').strftime('%Y%m%d')
                 closing_price = float(line[-3])
                 # 前一天的价格
                 try:
@@ -74,8 +83,9 @@ class DataGenerator(object):
                 except StopIteration:
                     break
                 the_day_before_closing_price = float(line[-3])
-                trend = [1, 0] if closing_price > the_day_before_closing_price else [0, 1]
-                self.stock_trend[date_time] = trend                           
+                trend = [
+                    1, 0] if closing_price > the_day_before_closing_price else [0, 1]
+                self.stock_trend[date_time] = trend
 
 
 def deepPredictionModel(input_dim=3, output_dim=2):
@@ -113,7 +123,8 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     hidden_layer = Dense(10, activation='relu')(merge_layer)
 
     # output layer
-    output = Dense(2, activation=K.sigmoid)(hidden_layer) # 二维向量： 升（1， 0）；降（0， 1）
+    output = Dense(2, activation=K.sigmoid)(
+        hidden_layer)  # 二维向量： 升（1， 0）；降（0， 1）
 
     model = Model(input=[short_term_input, middle_term_input,
                          long_term_input], output=output)
@@ -126,6 +137,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
 
 
 def trainCNN(model):
+    model.fit()
     pass
 
 
