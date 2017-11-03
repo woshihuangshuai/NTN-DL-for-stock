@@ -7,8 +7,8 @@ import datetime
 
 import numpy as np
 from keras import backend as K
-from keras.layers import (Activation, Conv2D, Dense, Flatten, Input,
-                          MaxPooling2D, Merge, Permute, Reshape)
+from keras.layers import (Conv2D, Dense, Flatten, Input,
+                          MaxPooling2D, Merge, Reshape)
 from keras.models import Model
 
 
@@ -33,8 +33,8 @@ class DataGenerator(object):
         self.date_period = 30  # 时间周期
         # 下面三个列表中的元素已有对应
         self.date_list = []  # 日期列表
-        self.input = []  # 输入数据
-        self.label = []  # 标签
+        self.input_data = []  # 输入数据
+        self.label_data = []  # 标签
 
     def get_data(self):
         self.parse_date_file()
@@ -56,9 +56,9 @@ class DataGenerator(object):
                     thirty_days_EM.append(self.ntn_result[date_idx])
                 else:
                     thirty_days_EM.append([0.0, 0.0, 0.0])
-            self.input.append(thirty_days_EM)
-            self.label.append(self.stock_trend[date_time_str])
-        return self.date_list, self.input, self.label
+            self.input_data.append(thirty_days_EM)
+            self.label_data.append(self.stock_trend[date_time_str])
+        return self.date_list, self.input_data, self.label_data
 
     def parse_date_file(self):
         with open(self.ntn_result_file_dir, 'r') as ntn_result_file:
@@ -146,4 +146,26 @@ if __name__ == '__main__':
     model.summary()
 
     dategenerator = DataGenerator()
-    dategenerator.get_data()
+    date_list, input_data, label_data = dategenerator.get_data()
+    
+    t = len(input_data) * 0.9
+    input_train = input_data[:t]
+    input_test = input_data[t:]
+    label_train = label_data[:t]
+    label_test = label_data[t:]
+
+    # train
+    input1_train = np.array([item[0] for item in input_train])
+    input2_train = np.array([item[:7] for item in input_train])
+    input3_train = np.array(input_train)
+    label_train_array = np.array(label_train)
+    model.fit([input1_train, input2_train, input3_train], label_train_array, batch_size=32, epochs=10)
+
+    # test
+    input1_test = np.array([item[0] for item in input_test])
+    input2_test = np.array([item[:7] for item in input_test])
+    input3_test = np.array(input_test)
+    label_test_array = np.array(label_test)   
+    result = model.predict([input1_test, input2_test, input3_test]) 
+    print result
+
