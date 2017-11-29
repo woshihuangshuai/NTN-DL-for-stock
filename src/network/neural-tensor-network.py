@@ -24,7 +24,6 @@ class TrainDataGenerator(object):
         self.news_title_EM_dir = '../../data/event_embedding/news_title/'
         self.all_news_EM_dir = '../../data/event_embedding/all_news/'
 
-
     def __iter__(self):
         for file in glob.glob(self.all_news_EM_dir + '*'):
             filename = file.split('/')[-1]
@@ -74,8 +73,9 @@ def neuralTensorNetwork(input_dim=100, output_dim=3):
         lr=0.001, decay=1e-6, momentum=0.9, nesterov=True), loss=contrastive_max_margin)
 
     # Use this model to get event-embedding
-    layer_name = 'neuraltensorlayer_3' # layer: U
-    predict_model = Model(input=train_model.input, output=train_model.get_layer(layer_name).output)
+    layer_name = 'neuraltensorlayer_3'  # layer: U
+    predict_model = Model(input=train_model.input,
+                          output=train_model.get_layer(layer_name).output)
 
     return train_model, predict_model
 
@@ -107,13 +107,13 @@ if __name__ == '__main__':
                  U层的输出：神经张量网络输出的结果
     '''
     train_model, predict_model = neuralTensorNetwork()
-    
+
     print 'Train model summary:'
     train_model.summary()
     print 'Predict model summary:'
     predict_model.summary()
 
-    for i in range(10): # epoch=10
+    for i in range(10):  # epoch=10
         print 'epoch: %d' % i
         dataGenerator = TrainDataGenerator()
         for date_time, input1, input2, input3 in dataGenerator:
@@ -128,7 +128,8 @@ if __name__ == '__main__':
     date_list = []
     result_list = []
     for date_time, input1, input2, input3 in dataGenerator:
-        label = predict_model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
+        label = predict_model.predict_on_batch(
+            [np.array(input1), np.array(input2), np.array(input3)])
         result = np.mean(label[1], axis=0)
         result_list.append(result.tolist())
         date_list.append(date_time)
@@ -136,7 +137,7 @@ if __name__ == '__main__':
     result_array = np.array(result_list)
     # result_array = (result_array - result_array.min(axis=0))/(result_array.max(axis=0) - result_array.min(axis=0)) # 结果归一化
     result_list = result_array.tolist()
-   
+
     print result_list
 
     ntn_result_file_dir = '../../data/ntn_result'

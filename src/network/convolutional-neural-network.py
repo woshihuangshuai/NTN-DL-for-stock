@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     dategenerator = DataGenerator()
     date_list, input_data, label_data = dategenerator.get_data()
-    
+
     t = int(len(input_data) * 0.9)
     input_train = input_data[:t]
     input_test = input_data[t:]
@@ -160,12 +160,13 @@ if __name__ == '__main__':
     input2_train = np.array([item[:7] for item in input_train])
     input3_train = np.array(input_train)
     label_train_array = np.array(label_train)
-    model.fit([input1_train, input2_train, input3_train], label_train_array, batch_size=32, nb_epoch=10)
+    model.fit([input1_train, input2_train, input3_train],
+              label_train_array, batch_size=32, nb_epoch=10)
 
     # test
     input1_test = np.array([item[0] for item in input_test])
     input2_test = np.array([item[:7] for item in input_test])
     input3_test = np.array(input_test)
-    label_test_array = np.array(label_test)   
-    result = model.predict([input1_test, input2_test, input3_test]) 
+    label_test_array = np.array(label_test)
+    result = model.predict([input1_test, input2_test, input3_test])
     print result
