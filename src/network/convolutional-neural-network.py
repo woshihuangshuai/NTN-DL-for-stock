@@ -129,7 +129,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     model = Model(input=[short_term_input, middle_term_input,
                          long_term_input], output=output)
 
-    model.compile(loss='categorical_crossentropy',
+    model.compile(loss='binary_crossentropy',
                   optimizer='rmsprop',
                   metrics=['accuracy'])
 
@@ -137,6 +137,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
 
 
 def trainCNN(model):
+    '''No use'''
     model.fit()
     pass
 
