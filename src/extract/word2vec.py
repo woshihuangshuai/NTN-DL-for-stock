@@ -121,10 +121,8 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
     # Normalization
     all_word_embeddings = []
     for key in event_embedding_dic.keys():
-        all_word_embeddings.extend([word_embedding for word_embedding in event_embedding_dic[key]])
-    
-    print len(all_word_embeddings)
-    print all_word_embeddings
+        all_word_embeddings.extend(
+            [word_embedding for word_embedding in event_embedding_dic[key]])
 
     all_word_embeddings_array = np.array(all_word_embeddings)
     min_word_embedding = all_word_embeddings_array.min(axis=0)
@@ -214,7 +212,7 @@ def event2VecAllNews(model, event_file_list, save_dir):
                 event_embedding_list.append(event_embedding)
                 line = event_file.readline()
         event_embedding_dic[filename] = event_embedding_list
-    
+
     # Normalization
     all_word_embeddings = []
     for key in event_embedding_dic.keys():
