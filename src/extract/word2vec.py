@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 
@@ -50,7 +50,7 @@ def getModel():
 
 
 def event2Vec_NewsTitle():
-    print 'Transforming news title event to event_embedding.'
+    print 'Transforming news title event to word_embedding.'
     dir_path = '../../data/news_title/event/*'
     save_dir = '../../data/event_embedding/news_title/'
 
@@ -71,24 +71,24 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
                             [   
                                 [...],
                                 [...],
-                                [...]   # a event-embedding 
+                                [...]   # a word-embedding 
                             ],
 
                             [   
                                 [...],
                                 [...],
-                                [...]   # a event-embedding 
+                                [...]   # a word-embedding 
                             ],
 
                             ...
 
-                            # event-embeddings of one day 
+                            # word-embeddings of one day's events 
                         ]
     '''
 
     event_embedding_dic = {}
     for file in event_file_list:
-        print 'Transforming %s event into event-embedding.' % file
+        print 'Transforming %s event into word-embedding.' % file
         with open(file, 'r') as event_file:
             line = event_file.readline()
             while line:
@@ -97,6 +97,7 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
                 datetime = t[0]
                 del t[0]
                 if len(t) != 3:
+                    line = event_file.readline()
                     continue
                 for arg in t:
                     word_list = arg.split()
@@ -106,17 +107,35 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
                         try:
                             sum += model.wv[word]
                         except:
+                            line = event_file.readline()
                             continue
                     mean = sum / length
                     event_embedding.append(mean)
-                # print event_embedding
 
                 if datetime not in event_embedding_dic.keys():
                     event_embedding_dic[datetime] = [event_embedding]
                 else:
                     event_embedding_dic[datetime].append(event_embedding)
-
                 line = event_file.readline()
+
+    # Normalization
+    all_word_embeddings = []
+    for key in event_embedding_dic.keys():
+        all_word_embeddings.extend([word_embedding for word_embedding in event_embedding_dic[key]])
+    
+    print len(all_word_embeddings)
+    print all_word_embeddings
+
+    all_word_embeddings_array = np.array(all_word_embeddings)
+    min_word_embedding = all_word_embeddings_array.min(axis=0)
+    max_word_embedding = all_word_embeddings_array.max(axis=0)
+    max_minus_min = max_word_embedding - min_word_embedding
+
+    for key in event_embedding_dic.keys():
+        for i in range(len(event_embedding_dic[key])):
+            t = event_embedding_dic[key][i]
+            t = (t - min_word_embedding) / max_minus_min
+            event_embedding_dic[key][i] = t
 
     # persistence
     print 'persisting...'
@@ -167,6 +186,7 @@ def event2VecAllNews(model, event_file_list, save_dir):
     if os.path.exists(save_dir) == False:
         os.makedirs(save_dir)
 
+    event_embedding_dic = {}
     for file_idx in trange(len(event_file_list), desc='Main progress'):
         file = event_file_list[file_idx]
         filename = file.split('/')[-1]
@@ -191,13 +211,34 @@ def event2VecAllNews(model, event_file_list, save_dir):
                             continue
                     mean = sum / length
                     event_embedding.append(mean)
-                # print event_embedding
                 event_embedding_list.append(event_embedding)
-
                 line = event_file.readline()
+        event_embedding_dic[filename] = event_embedding_list
+    
+    # Normalization
+    all_word_embeddings = []
+    for key in event_embedding_dic.keys():
+        all_word_embeddings.extend(
+            [word_embedding for word_embedding in event_embedding_dic[key]])
 
-        npzfile = filename + '.npy'
-        np.save(save_dir + npzfile, event_embedding_list)
+    all_word_embeddings_array = np.array(all_word_embeddings)
+    min_word_embedding = all_word_embeddings_array.min(axis=0)
+    max_word_embedding = all_word_embeddings_array.max(axis=0)
+    max_minus_min = max_word_embedding - min_word_embedding
+
+    for key in event_embedding_dic.keys():
+        for i in range(len(event_embedding_dic[key])):
+            t = event_embedding_dic[key][i]
+            t = (t - min_word_embedding) / max_minus_min
+            event_embedding_dic[key][i] = t
+
+    # persistence
+    print 'persisting...'
+    for datetime in event_embedding_dic.keys():
+        if os.path.exists(save_dir) == False:
+            os.makedirs(save_dir)
+        npzfile = datetime + '.npy'
+        np.save(save_dir + npzfile, event_embedding_dic[datetime])
 
 
 if __name__ == '__main__':
