@@ -1,5 +1,6 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding=utf-8 -*-
+
 
 import glob
 import math
@@ -46,6 +47,7 @@ class TrainDataGenerator(object):
 
 
 def neuralTensorNetwork(input_dim=100, output_dim=3):
+    '''在实现网络时，应仅设定P为输出层，待网络训练完成后，通过获取U层的输出作为结果'''
     # input layer
     input1 = Input(shape=(input_dim,), dtype='float32')
     input2 = Input(shape=(input_dim,), dtype='float32')
@@ -66,12 +68,16 @@ def neuralTensorNetwork(input_dim=100, output_dim=3):
     # p layer is used for training the network.
     p = Dense(output_dim=1)(U)
 
-    model = Model(input=[input1, input2, input3], output=[p, U])
+    # Use this model to train the network
+    train_model = Model(input=[input1, input2, input3], output=[p])
+    train_model.compile(optimizer=SGD(
+        lr=0.001, decay=1e-6, momentum=0.9, nesterov=True), loss=contrastive_max_margin)
 
-    sgd = SGD(lr=0.001, decay=1e-6, momentum=0.9, nesterov=True)
-    model.compile(loss=contrastive_max_margin,
-                  optimizer=sgd, loss_weights=[1., 0.])
-    return model
+    # Use this model to get event-embedding
+    layer_name = 'neuraltensorlayer_3' # layer: U
+    predict_model = Model(input=train_model.input, output=train_model.get_layer(layer_name).output)
+
+    return train_model, predict_model
 
 
 def trainNTN(model):
@@ -100,28 +106,38 @@ if __name__ == '__main__':
         输出结果： p层的输出：为了训练而添加的层
                  U层的输出：神经张量网络输出的结果
     '''
-    model = neuralTensorNetwork()
-    model.summary()
-    dataGenerator = TrainDataGenerator()
-    for date_time, input1, input2, input3 in dataGenerator:
-        label = model.predict_on_batch(
-            [np.array(input1), np.array(input2), np.array(input3)])
-        random.shuffle(input1)
-        model.train_on_batch(
-            [np.array(input1), np.array(input2), np.array(input3)], label)
-    # print model.get_weights()
+    train_model, predict_model = neuralTensorNetwork()
+    
+    print 'Train model summary:'
+    train_model.summary()
+    print 'Predict model summary:'
+    predict_model.summary()
+
+    for i in range(10): # epoch=10
+        print 'epoch: %d' % i
+        dataGenerator = TrainDataGenerator()
+        for date_time, input1, input2, input3 in dataGenerator:
+            label = train_model.predict_on_batch(
+                [np.array(input1), np.array(input2), np.array(input3)])
+            for item in input1:
+                random.shuffle(item)
+            train_model.train_on_batch(
+                [np.array(input1), np.array(input2), np.array(input3)], label)
+    # print train_model.get_weights()
 
     date_list = []
     result_list = []
     for date_time, input1, input2, input3 in dataGenerator:
-        label = model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
+        label = predict_model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
         result = np.mean(label[1], axis=0)
         result_list.append(result.tolist())
         date_list.append(date_time)
 
     result_array = np.array(result_list)
-    result_array = (result_array - result_array.min(axis=0))/(result_array.max(axis=0) - result_array.min(axis=0)) # 结果归一化
+    # result_array = (result_array - result_array.min(axis=0))/(result_array.max(axis=0) - result_array.min(axis=0)) # 结果归一化
     result_list = result_array.tolist()
+   
+    print result_list
 
     ntn_result_file_dir = '../../data/ntn_result'
     with open(ntn_result_file_dir, 'w') as ntn_result_file:
