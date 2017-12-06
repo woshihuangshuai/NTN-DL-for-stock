@@ -65,7 +65,7 @@ def neuralTensorNetwork(input_dim=100, output_dim=3):
                           V_regularizer=l2(0.0001), b_regularizer=l2(0.0001))([R_1, R_2])
 
     # p layer is used for training the network.
-    p = Dense(output_dim=1)(U)
+    p = Dense(output_dim=1, activation='tanh')(U)
 
     # Use this model to train the network
     train_model = Model(input=[input1, input2, input3], output=[p])
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     print 'Predict model summary:'
     predict_model.summary()
 
-    for i in range(10):  # epoch=10
+    for i in range(500):  # epoch(N)=500
         print 'epoch: %d' % i
         dataGenerator = TrainDataGenerator()
         for date_time, input1, input2, input3 in dataGenerator:
