@@ -120,10 +120,10 @@ def deepPredictionModel(input_dim=3, output_dim=2):
         [short_term_input, middle_flatten_layer, long_flatten_layer])
 
     # fully-connected layer
-    hidden_layer = Dense(10, activation='relu')(merge_layer)
+    hidden_layer = Dense(10, activation='sigmoid')(merge_layer)
 
     # output layer
-    output = Dense(2, activation=K.sigmoid)(
+    output = Dense(2, activation='sigmoid')(
         hidden_layer)  # 二维向量： 升（1， 0）；降（0， 1）
 
     model = Model(input=[short_term_input, middle_term_input,
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     input3_train = np.array(input_train)
     label_train_array = np.array(label_train)
     model.fit([input1_train, input2_train, input3_train],
-              label_train_array, batch_size=32, nb_epoch=10)
+              label_train_array, batch_size=32, nb_epoch=10, verbose=1)
 
     # test
     input1_test = np.array([item[0] for item in input_test])
