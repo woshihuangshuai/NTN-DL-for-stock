@@ -12,7 +12,7 @@ from keras import backend as K
 from keras.layers import Dense, Input
 from keras.models import Model
 from keras.objectives import hinge
-from keras.optimizers import SGD
+from keras.optimizers import Adadelta
 from keras.regularizers import l2
 
 from NeuralTensorLayer import NeuralTensorLayer, contrastive_max_margin
@@ -68,9 +68,8 @@ def neuralTensorNetwork(input_dim=100, output_dim=3):
     p = Dense(output_dim=1, activation='tanh')(U)
 
     # Use this model to train the network
-    train_model = Model(input=[input1, input2, input3], output=[p])
-    train_model.compile(optimizer=SGD(
-        lr=0.001, decay=1e-6, momentum=0.9, nesterov=True), loss=contrastive_max_margin)
+    train_model = Model(input=[input1, input2, input3], output=p)
+    train_model.compile(optimizer='adadelta', loss=contrastive_max_margin)
 
     # Use this model to get event-embedding
     layer_name = 'neuraltensorlayer_3'  # layer: U
