@@ -36,6 +36,8 @@ class DataGenerator(object):
         self.input_data = []  # 输入数据
         self.label_data = []  # 标签
 
+        self.output_dim = 3
+
     def get_data(self):
         self.parse_date_file()
         # 开始的三十天因为历史新闻数据不足，所以从30天后开始
@@ -55,7 +57,7 @@ class DataGenerator(object):
                 if date_idx in self.ntn_result.keys():
                     thirty_days_EM.append(self.ntn_result[date_idx])
                 else:
-                    thirty_days_EM.append([0.0, 0.0, 0.0])
+                    thirty_days_EM.append([0.0] * self.output_dim)
             self.input_data.append(thirty_days_EM)
             self.label_data.append(self.stock_trend[date_time_str])
         return self.date_list, self.input_data, self.label_data
@@ -119,17 +121,16 @@ def deepPredictionModel(input_dim=3, output_dim=2):
         [short_term_input, middle_flatten_layer, long_flatten_layer])
 
     # fully-connected layer
-    hidden_layer = Dense(output_dim=1, activation='sigmoid')(merge_layer)  # class: Up(+1); Down(-1)
+    hidden_layer = Dense(output_dim=10, activation='sigmoid')(merge_layer)
 
-    # # output layer
-    # output = Dense(output_dim=2, activation='sigmoid')(
-    #     hidden_layer)  # 二维向量： 升（1， 0）；降（0， 1）
+    # output layer
+    output_layer = Dense(output_dim=1, activation='sigmoid')(hidden_layer)  # class: Up(+1); Down(-1)
 
     model = Model(input=[short_term_input, middle_term_input,
-                         long_term_input], output=hidden_layer)
+                         long_term_input], output=output_layer)
 
     model.compile(loss='binary_crossentropy',
-                  optimizer='rmsprop',
+                  optimizer='adadelta',
                   metrics=['accuracy'])
 
     return model
