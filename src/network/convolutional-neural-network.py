@@ -83,8 +83,7 @@ class DataGenerator(object):
                 except StopIteration:
                     break
                 the_day_before_closing_price = float(line[-3])
-                trend = [
-                    1, 0] if closing_price > the_day_before_closing_price else [0, 1]
+                trend = 1 if closing_price > the_day_before_closing_price else -1
                 self.stock_trend[date_time] = trend
 
 
@@ -120,14 +119,14 @@ def deepPredictionModel(input_dim=3, output_dim=2):
         [short_term_input, middle_flatten_layer, long_flatten_layer])
 
     # fully-connected layer
-    hidden_layer = Dense(10, activation='sigmoid')(merge_layer)
+    hidden_layer = Dense(output_dim=1, activation='sigmoid')(merge_layer)  # class: Up(+1); Down(-1)
 
-    # output layer
-    output = Dense(2, activation='sigmoid')(
-        hidden_layer)  # 二维向量： 升（1， 0）；降（0， 1）
+    # # output layer
+    # output = Dense(output_dim=2, activation='sigmoid')(
+    #     hidden_layer)  # 二维向量： 升（1， 0）；降（0， 1）
 
     model = Model(input=[short_term_input, middle_term_input,
-                         long_term_input], output=output)
+                         long_term_input], output=hidden_layer)
 
     model.compile(loss='binary_crossentropy',
                   optimizer='rmsprop',
@@ -135,7 +134,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
 
     return model
 
-
+ 
 def trainCNN(model):
     '''No use'''
     model.fit()
