@@ -107,5 +107,8 @@ class NeuralTensorLayer(Layer):
 
 
 def contrastive_max_margin(y_true, y_pred):
-    # contrastive max-margin loss function
+    '''
+        contrastive max-margin loss function
+        目标函数缺少正则化项
+    '''
     return K.mean(K.maximum(1. - y_true + y_pred, 0.), axis=-1)
