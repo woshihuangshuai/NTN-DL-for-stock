@@ -22,6 +22,7 @@ from keras.models import Model
 class RandomDataGenerator(object):
     '''生成随机初始化的数据, 待实现'''
 
+
 class DataGenerator(object):
     '''
         Event-embedding数据:
@@ -104,34 +105,36 @@ def deepPredictionModel(input_dim=3, output_dim=2):
                               dtype='float32')      # shape=(7, k)
     middle_reshape_layer = Reshape((1, 7, input_dim))(middle_term_input)
     # middle convolutional layer
-    middle_conv_layer = Conv2D(nb_filter=1, nb_row=3, nb_col=1, dim_ordering='th',
-                               border_mode='valid')(middle_reshape_layer)
+    middle_conv_layer = Conv2D(nb_filter=1, nb_row=3, nb_col=1,
+                               dim_ordering='th', border_mode='valid')(middle_reshape_layer)
     # middle max-pooling layer
     middle_pooling_layer = MaxPooling2D(pool_size=(
-        1, input_dim), border_mode='valid', dim_ordering='th')(middle_conv_layer)
-    middle_flatten_layer = Flatten()(middle_pooling_layer)
+        5, 1), border_mode='valid', dim_ordering='th')(middle_conv_layer)
+    middle_term_output = Flatten()(middle_pooling_layer)
 
     # long term input layer
     long_term_input = Input(shape=(30, input_dim),
                             dtype='float32')        # shape=(30, k)
     long_reshape_layer = Reshape((1, 30, input_dim))(long_term_input)
     # long term convolutional layer
-    long_conv_layer = Conv2D(nb_filter=1,  nb_row=3, nb_col=1, dim_ordering='th',
-                             border_mode='valid')(long_reshape_layer)
-    # long term max-pooling layer                              
+    long_conv_layer = Conv2D(nb_filter=1,  nb_row=3, nb_col=1,
+                             dim_ordering='th', border_mode='valid')(long_reshape_layer)
+    # long term max-pooling layer
     long_pooling_layer = MaxPooling2D(pool_size=(
-        1, input_dim), border_mode='valid', dim_ordering='th')(long_conv_layer)
-    long_flatten_layer = Flatten()(long_pooling_layer)
+        28, 1), border_mode='valid', dim_ordering='th')(long_conv_layer)
+    long_term_output = Flatten()(long_pooling_layer)
 
     # merge layer
     merge_layer = Merge(mode='concat', concat_axis=-1)(
-        [short_term_input, middle_flatten_layer, long_flatten_layer])
+        [short_term_input, middle_term_output, long_term_output])
 
     # fully-connected layer
     hidden_layer = Dense(output_dim=10, activation='sigmoid')(merge_layer)
 
     # output layer
     output_layer = Dense(output_dim=1, activation='sigmoid')(hidden_layer)  # class: Up(+1); Down(-1)
+
+    # TODO softmax layer?
 
     model = Model(input=[short_term_input, middle_term_input,
                          long_term_input], output=output_layer)
@@ -142,7 +145,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
 
     return model
 
- 
+
 def trainCNN(model):
     '''No use'''
     model.fit()
