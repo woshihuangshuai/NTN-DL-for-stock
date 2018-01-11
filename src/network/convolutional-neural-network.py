@@ -13,11 +13,14 @@ from keras.models import Model
 
 
 '''
-    short_term_input = U1
-    middle_term_input = [U1 ~ U7]
-    long_term_input = [U1 ~ U30]
+    short_term_input    = U1
+    middle_term_input   = [U1 ~ U7]
+    long_term_input     = [U1 ~ U30]
 '''
 
+
+class RandomDataGenerator(object):
+    '''生成随机初始化的数据, 待实现'''
 
 class DataGenerator(object):
     '''

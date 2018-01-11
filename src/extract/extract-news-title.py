@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 
 '''
-extract news' title 
-date format:
-filename: 
+从原始新闻数据提取出每篇新闻的标题，每个数据集整合成一个文件。 
+
+输出文件名: 
     ReutersNews106521_news_title.txt
     20061020_20131126_bloomberg_news_news_title.txt
-content format:
+
+数据内容格式:
     date \t news_title \n
 '''
 
@@ -20,7 +21,7 @@ raw_news_dir = '../../data/raw_news/'
 news_title_dir = '../../data/news_title/'
 raw_news_folder = ['bloomberg', 'reuters']
 
-# extract news of reuters
+# extract news title from reuters' news
 reuters_news_file = open(news_title_dir + 'reuters_news_title.txt', 'w')
 subfolder_list = glob.glob(raw_news_dir + 'reuters/*')
 pbar = tqdm(total=len(subfolder_list))
@@ -45,7 +46,7 @@ for subfolder in subfolder_list:
 pbar.close()
 reuters_news_file.close()
 
-# extract news of bloomberg
+# extract news title from bloomberg's news
 bloomberg_news_file = open(news_title_dir + 'bloomberg_news_title.txt', 'w')
 subfolder_list = glob.glob(raw_news_dir + 'bloomberg/*')
 pbar = tqdm(total=len(subfolder_list))

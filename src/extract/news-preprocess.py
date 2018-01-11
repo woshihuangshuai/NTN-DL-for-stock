@@ -2,7 +2,23 @@
 # -*- coding: utf-8 -*-
 
 '''
-    对bloomberg和reuters中的所有新闻按文件进行预处理，每篇新闻保存到单独的文件。
+    对bloomberg和reuters中的所有新闻按文件进行预处理，并优化目录结构
+    
+    目录结构：
+    processed_news
+    |
+    ├── 20061020
+    |   ├── news1
+    |   ├── news2
+    |   └── ...
+    |
+    ├── 20061021
+    |   ├── news1
+    |   ├── news2
+    |   └── ...
+    |
+    └── ...
+    
 '''
 
 import os
