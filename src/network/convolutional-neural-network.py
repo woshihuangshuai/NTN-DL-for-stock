@@ -89,7 +89,7 @@ class DataGenerator(object):
                 except StopIteration:
                     break
                 the_day_before_closing_price = float(line[-3])
-                trend = 1 if closing_price > the_day_before_closing_price else -1
+                trend = [1, 0] if closing_price > the_day_before_closing_price else [0, 1]
                 self.stock_trend[date_time] = trend
 
 
@@ -132,7 +132,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     hidden_layer = Dense(output_dim=10, activation='sigmoid')(merge_layer)
 
     # output layer
-    output_layer = Dense(output_dim=1, activation='sigmoid')(hidden_layer)  # class: Up(+1); Down(-1)
+    output_layer = Dense(output_dim=2, activation='sigmoid')(hidden_layer)  # class: Up([1, 0]); Down([0, 1])
 
     # TODO softmax layer?
 
