@@ -104,7 +104,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     middle_reshape_layer = Reshape((1, 7, input_dim))(middle_term_input)
     # middle convolutional layer
     middle_conv_layer = Conv2D(nb_filter=1, nb_row=3, nb_col=1,
-                               dim_ordering='th', border_mode='valid')(middle_reshape_layer)
+                               dim_ordering='th', border_mode='valid', init='glorot_normal')(middle_reshape_layer)
     # middle max-pooling layer
     middle_pooling_layer = MaxPooling2D(pool_size=(
         5, 1), border_mode='valid', dim_ordering='th')(middle_conv_layer)
@@ -116,7 +116,7 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     long_reshape_layer = Reshape((1, 30, input_dim))(long_term_input)
     # long term convolutional layer
     long_conv_layer = Conv2D(nb_filter=1,  nb_row=3, nb_col=1,
-                             dim_ordering='th', border_mode='valid')(long_reshape_layer)
+                             dim_ordering='th', border_mode='valid', init='glorot_normal')(long_reshape_layer)
     # long term max-pooling layer
     long_pooling_layer = MaxPooling2D(pool_size=(
         28, 1), border_mode='valid', dim_ordering='th')(long_conv_layer)
@@ -127,10 +127,10 @@ def deepPredictionModel(input_dim=3, output_dim=2):
         [short_term_input, middle_term_output, long_term_output])
 
     # fully-connected layer
-    hidden_layer = Dense(output_dim=10, activation='sigmoid')(merge_layer)
+    hidden_layer = Dense(output_dim=10, activation='sigmoid', init='glorot_normal')(merge_layer)
 
     # output layer
-    output_layer = Dense(output_dim=2, activation='softmax')(
+    output_layer = Dense(output_dim=2, activation='softmax', init='glorot_normal')(
         hidden_layer)  # class: Up([1, 0]); Down([0, 1])
 
     model = Model(input=[short_term_input, middle_term_input,
@@ -185,15 +185,22 @@ if __name__ == '__main__':
     model.fit([input1_train, input2_train, input3_train],
               label_train, batch_size=100, nb_epoch=500, verbose=1)
     result = model.predict([input1_test, input2_test, input3_test])
+    print result
 
-    count1 = 0
-    count2 = 0
-    for item in result:
-        if item[0] > item[1]:
-            count1 += 1
+    total = len(test_label)
+    correct = 0
+    for item in zip(result, test_label):
+        result = item[0]
+        label = item[1]
+        if result[0] > result[1]:
+            result = [1, 0]
         else:
-            count2 += 1
-    print count1, count2
+            result = [0, 1]
+        if result == label:
+            correct += 1
+    print 'count of correct item:', correct
+    print 'total:', total
+    print 'accuracy:', float(correct)/float(total)
     # *********使用随机生成的数据集进行测试end***********
 
     # dategenerator = DataGenerator()
