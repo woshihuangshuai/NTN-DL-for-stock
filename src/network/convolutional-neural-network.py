@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 
@@ -7,9 +7,10 @@ import datetime
 
 import numpy as np
 from keras import backend as K
-from keras.layers import (Conv2D, Dense, Flatten, Input,
-                          MaxPooling2D, Merge, Reshape)
+from keras.layers import (Conv2D, Dense, Flatten, Input, MaxPooling2D, Merge,
+                          Reshape)
 from keras.models import Model
+from keras.utils import np_utils
 
 
 '''
@@ -17,10 +18,6 @@ from keras.models import Model
     middle_term_input   = [U1 ~ U7]
     long_term_input     = [U1 ~ U30]
 '''
-
-
-class RandomDataGenerator(object):
-    '''生成随机初始化的数据, 待实现'''
 
 
 class DataGenerator(object):
@@ -89,7 +86,8 @@ class DataGenerator(object):
                 except StopIteration:
                     break
                 the_day_before_closing_price = float(line[-3])
-                trend = [1, 0] if closing_price > the_day_before_closing_price else [0, 1]
+                trend = [
+                    1, 0] if closing_price > the_day_before_closing_price else [0, 1]
                 self.stock_trend[date_time] = trend
 
 
@@ -132,9 +130,10 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     hidden_layer = Dense(output_dim=10, activation='sigmoid')(merge_layer)
 
     # output layer
-    output_layer = Dense(output_dim=2, activation='sigmoid')(hidden_layer)  # class: Up([1, 0]); Down([0, 1])
+    output_layer = Dense(output_dim=2, activation='sigmoid')(
+        hidden_layer)  # class: Up([1, 0]); Down([0, 1])
 
-    # TODO softmax layer?
+    # TODO softmax layer
 
     model = Model(input=[short_term_input, middle_term_input,
                          long_term_input], output=output_layer)
@@ -152,31 +151,74 @@ def trainCNN(model):
     pass
 
 
+def RandomDataGenerator(length, network_input_dim):
+    '''生成随机初始化的数据'''
+    # TODO 随机生成训练和测试数据的方法
+    dataset = np.random.rand(length, 30, network_input_dim)
+    label = np_utils.to_categorical(
+        np.random.randint(0, 2, 3000), nb_classes=2)
+    return dataset.tolist(), label.tolist()
+
+
 if __name__ == '__main__':
-    model = deepPredictionModel()
+    model = deepPredictionModel(input_dim=100)
     model.summary()
 
-    dategenerator = DataGenerator()
-    date_list, input_data, label_data = dategenerator.get_data()
+    # *********使用随机生成的数据集进行测试start*********
+    dataset, label = RandomDataGenerator(3000, 100)
+    t = int(len(label) * 0.8)
+    train_data = dataset[:t]
+    train_label = label[:t]
+    test_data = dataset[t:]
+    test_label = label[t:]
 
-    t = int(len(input_data) * 0.9)
-    input_train = input_data[:t]
-    input_test = input_data[t:]
-    label_train = label_data[:t]
-    label_test = label_data[t:]
+    # train data
+    input1_train = np.array([item[0] for item in train_data])
+    input2_train = np.array([item[:7] for item in train_data])
+    input3_train = np.array(train_data)
+    label_train = np.array(train_label)
 
-    # train
-    input1_train = np.array([item[0] for item in input_train])
-    input2_train = np.array([item[:7] for item in input_train])
-    input3_train = np.array(input_train)
-    label_train_array = np.array(label_train)
+    # test data
+    input1_test = np.array([item[0] for item in test_data])
+    input2_test = np.array([item[:7] for item in test_data])
+    input3_test = np.array(test_data)
+    label_test = np.array(test_label)
+
     model.fit([input1_train, input2_train, input3_train],
-              label_train_array, batch_size=32, nb_epoch=10, verbose=1)
-
-    # test
-    input1_test = np.array([item[0] for item in input_test])
-    input2_test = np.array([item[:7] for item in input_test])
-    input3_test = np.array(input_test)
-    label_test_array = np.array(label_test)
+              label_train, batch_size=100, nb_epoch=500, verbose=1)
     result = model.predict([input1_test, input2_test, input3_test])
-    print result
+
+    count1 = 0
+    count2 = 0
+    for item in result:
+        if item[0] > item[1]:
+            count1 += 1
+        else:
+            count2 += 1
+    print count1, count2
+    # *********使用随机生成的数据集进行测试end***********
+
+    # dategenerator = DataGenerator()
+    # date_list, input_data, label_data = dategenerator.get_data()
+
+    # t = int(len(input_data) * 0.9)
+    # input_train = input_data[:t]
+    # input_test = input_data[t:]
+    # label_train = label_data[:t]
+    # label_test = label_data[t:]
+
+    # # train
+    # input1_train = np.array([item[0] for item in input_train])
+    # input2_train = np.array([item[:7] for item in input_train])
+    # input3_train = np.array(input_train)
+    # label_train_array = np.array(label_train)
+    # model.fit([input1_train, input2_train, input3_train],
+    #           label_train_array, batch_size=32, nb_epoch=10, verbose=1)
+
+    # # test
+    # input1_test = np.array([item[0] for item in input_test])
+    # input2_test = np.array([item[:7] for item in input_test])
+    # input3_test = np.array(input_test)
+    # label_test_array = np.array(label_test)
+    # result = model.predict([input1_test, input2_test, input3_test])
+    # print result
