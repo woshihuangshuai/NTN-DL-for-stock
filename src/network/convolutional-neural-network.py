@@ -130,10 +130,8 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     hidden_layer = Dense(output_dim=10, activation='sigmoid')(merge_layer)
 
     # output layer
-    output_layer = Dense(output_dim=2, activation='sigmoid')(
+    output_layer = Dense(output_dim=2, activation='softmax')(
         hidden_layer)  # class: Up([1, 0]); Down([0, 1])
-
-    # TODO softmax layer
 
     model = Model(input=[short_term_input, middle_term_input,
                          long_term_input], output=output_layer)
