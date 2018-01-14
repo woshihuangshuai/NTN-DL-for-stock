@@ -1,3 +1,4 @@
+# 批量对合并后的新闻文件进行ReVerb处理，以句子为单位提取句子中的三元候选元组
 save_dir="../../data/reverb/"
 
 if [ ! -d "../../data/reverb/" ]; then

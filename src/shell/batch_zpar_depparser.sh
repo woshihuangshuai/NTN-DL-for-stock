@@ -1,3 +1,5 @@
+# ZPar处理新闻分为两步，此为第二步<依赖分析>
+# 对ZPar词性标注的结果进行依赖分析，提取句子中的主谓宾
 save_dir="../../data/zpar/depparser/"
 
 if [ ! -d "../../data/zpar/" ]; then

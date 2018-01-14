@@ -1,3 +1,4 @@
+# 将一个日期目录下的所有新闻，合并为同一个文件，以加速ReVerb和ZPar的速度
 dirlist=`find ../../data/processed_news/* -type d`
 save_dir="../../data/merged_news/"
 

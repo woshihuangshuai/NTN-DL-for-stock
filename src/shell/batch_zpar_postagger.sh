@@ -1,3 +1,5 @@
+# ZPar处理新闻分为两步，此为第一步<词性标注>
+# 对合并后的新闻文件进行ZPar的词性标注操作
 save_dir="../../data/zpar/postagger/"
 
 if [ ! -d "../../data/zpar/" ]; then

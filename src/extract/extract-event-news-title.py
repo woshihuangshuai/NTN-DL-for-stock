@@ -4,6 +4,10 @@
 import re
 import os
 
+'''
+    手动对两个新闻标题文件依次进行 ReVerb、 ZPar-Postagger、 ZPar-depparser处理，输出的结果文件作为这里的输入
+'''
+
 data_dir = '../../data/news_title/'
 save_dir = '../../data/news_title/event/'
 data_resource = ['bloomberg', 'reuters']
