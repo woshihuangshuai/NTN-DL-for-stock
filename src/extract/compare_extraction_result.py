@@ -10,7 +10,7 @@ event_dic = {}
 with open(folder_dir + event_file_name, 'r') as event_file:
     line = event_file.readline()
     while line:
-        items = line.split('.')
+        items = line.split(',')
         if items[0] not in event_dic.keys():
             event_dic[items[0]] = ['\t'.join(items[1:])]
         else:
@@ -36,8 +36,8 @@ with open(folder_dir + compare_result_file_name, 'w') as compare_result_file:
         compare_result_file.write(split_line % key)
         compare_result_file.write(news_split_line)
         for news in title_dic[key]:
-            compare_result_file.write(news + '\n')
+            compare_result_file.write(news)
         compare_result_file.write(event_split_line)
         if key in event_dic.keys():
             for event in event_dic[key]:
-                compare_result_file.write(event + '\n')
+                compare_result_file.write(event)
