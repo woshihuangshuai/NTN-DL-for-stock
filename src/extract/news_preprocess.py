@@ -27,10 +27,11 @@
     
 '''
 
-import os
 import glob
-from tqdm import tqdm
+import os
 
+from nltk.tokenize import sent_tokenize
+from tqdm import tqdm
 
 news_resources = ['bloomberg', 'reuters']
 raw_news_dir = '../../data/raw_news/'
@@ -54,24 +55,16 @@ for news_resource in news_resources:
         pbar.set_description('Processing %s in %s' % (datetime, news_resource))
         pbar.update(1)
 
-        for file in glob.glob(folder + '/*'):
-            filename=file.split('/')[-1]
-            raw_news_file=open(file, 'r')
+        for file_dir in glob.glob(folder + '/*'):
+            filename = file_dir.split('/')[-1]
+            raw_news_file = open(file_dir, 'r')
+            processed_news_file = open(save_dir + filename, 'w')
 
-            processed_news_file=open(save_dir + filename, 'w')
-
-            content=''
-            for i in range(7):
-                raw_news_file.readline()
-
-            line=raw_news_file.readline()
-            while line:
-                content += line.strip('\n')
-                line=raw_news_file.readline()
-            news_lines=content.split('. ')
-            # print news_lines
-            for line in news_lines:
-                processed_news_file.write(line + '. \n')
+            lines = raw_news_file.readlines()
+            content = ' '.join([line.strip() for line in lines[7:]])
+            sent_list = sent_tokenize(content)
+            for sent in sent_list:
+                processed_news_file.write(line + '\n')
 
             raw_news_file.close()
             processed_news_file.close()
