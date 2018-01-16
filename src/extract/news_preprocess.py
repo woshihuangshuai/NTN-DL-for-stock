@@ -64,7 +64,7 @@ for news_resource in news_resources:
             content = ' '.join([line.strip() for line in lines[7:]])
             sent_list = sent_tokenize(content)
             for sent in sent_list:
-                processed_news_file.write(line + '\n')
+                processed_news_file.write(sent.lower() + '\n')
 
             raw_news_file.close()
             processed_news_file.close()
