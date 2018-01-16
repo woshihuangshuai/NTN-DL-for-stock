@@ -45,7 +45,7 @@ class TrainDataGenerator(object):
             yield date_time, input1, input2, input3  # 每次生成的input中包含了从当天的新闻标题和新闻正文中提取到的所有事件
 
 
-def neuralTensorNetwork(input_dim=100, output_dim=3):
+def neuralTensorNetwork(input_dim=100, output_dim=10):
     '''在实现网络时，应仅设定P为输出层，待网络训练完成后，通过获取U层的输出作为结果'''
     # input layer
     input1 = Input(shape=(input_dim,), dtype='float32')
