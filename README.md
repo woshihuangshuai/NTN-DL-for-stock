@@ -2,11 +2,12 @@
 
 ## 三方库
 
-    keras 1？ 2？
+    keras 1.2.2
     tqdm
     gensim
     numpy
     scipy
+    NLTK
 
 ## Data
 ### 新闻数据
