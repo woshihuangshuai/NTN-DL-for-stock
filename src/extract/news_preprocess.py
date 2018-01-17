@@ -1,5 +1,6 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding=utf-8 -*-
+
 
 '''
     对bloomberg和reuters中的所有新闻按文件进行预处理，并优化目录结构。
@@ -33,6 +34,8 @@ import os
 from nltk.tokenize import sent_tokenize
 from tqdm import tqdm
 
+import chardet
+
 news_resources = ['bloomberg', 'reuters']
 raw_news_dir = '../../data/raw_news/'
 processed_news_dir = '../../data/processed_news/'
@@ -45,6 +48,8 @@ for news_resource in news_resources:
                             news_resource + '/*')   # 获取目录下的所有子文件夹
     pbar = tqdm(total=len(folder_list))
 
+    total = 0
+    count = 0
     for folder in folder_list:
         folder_name = folder.split('/')[-1]
         datetime = ''.join(folder_name.split('-'))
@@ -60,12 +65,26 @@ for news_resource in news_resources:
             raw_news_file = open(file_dir, 'r')
             processed_news_file = open(save_dir + filename, 'w')
 
-            lines = raw_news_file.readlines()
+            lines = raw_news_file.read()
             content = ' '.join([line.strip() for line in lines[7:]])
-            sent_list = sent_tokenize(content)
-            for sent in sent_list:
-                processed_news_file.write(sent.lower() + '\n')
+            
+            content_encoding = chardet.detect(content)['encoding']    
+
+            total += 1
+            if content_encoding == 'ascii':
+                count += 1
+
+            # if content_encoding != 'utf-8':
+            #     content = content.decode(content_encoding).encode('UTF-8')
+            # print content_encoding + '----' + chardet.detect(content)['encoding']
+
+            # sent_list = sent_tokenize(content)
+            # for sent in sent_list:
+            #     processed_news_file.write(sent.lower() + '\n')
 
             raw_news_file.close()
             processed_news_file.close()
     pbar.close()
+
+    print total
+    print count
