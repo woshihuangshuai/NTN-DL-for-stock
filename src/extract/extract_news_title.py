@@ -21,7 +21,7 @@ raw_news_dir = '../../data/raw_news/'
 news_title_dir = '../../data/news_title/'
 raw_news_folder = ['bloomberg', 'reuters']
 
-# extract news title from reuters' news
+# extract news title from reuters' news title
 reuters_news_file = open(news_title_dir + 'reuters_news_title.txt', 'w')
 subfolder_list = glob.glob(raw_news_dir + 'reuters/*')
 pbar = tqdm(total=len(subfolder_list))
@@ -46,7 +46,7 @@ for subfolder in subfolder_list:
 pbar.close()
 reuters_news_file.close()
 
-# extract news title from bloomberg's news
+# extract news title from bloomberg's news title
 bloomberg_news_file = open(news_title_dir + 'bloomberg_news_title.txt', 'w')
 subfolder_list = glob.glob(raw_news_dir + 'bloomberg/*')
 pbar = tqdm(total=len(subfolder_list))
