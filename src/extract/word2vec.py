@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import string
+import codecs
 
 import gensim
 import numpy as np
@@ -25,7 +26,7 @@ class Mysentences(object):
 
     def __iter__(self):
         for news_dir in glob.glob(self.news_dir + '/*'):
-            with open(news_dir, 'r') as f:
+            with codecs.open(news_dir, 'r', encoding='UTF-8') as f:
                 line = f.readline()
                 while line:
                     words = [re.sub(r'[^a-z]+', ' ', word).strip()
@@ -88,7 +89,7 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
     event_embedding_dic = {}
     for file in event_file_list:
         print 'Transforming %s event into word-embedding.' % file
-        with open(file, 'r') as event_file:
+        with codecs.open(file, 'r', encoding='UTF-8') as event_file:
             line = event_file.readline()
             while line:
                 event_embedding = []
@@ -194,7 +195,7 @@ def event2VecAllNews(model, event_file_list, save_dir):
         filename = file.split('/')[-1]
         event_embedding_list = []
         
-        with open(file, 'r') as event_file:
+        with codecs.open(file, 'r', encoding='UTF-8') as event_file:
             lines = event_file.readlines()
             for line_idx in trange(len(lines), desc='%s' % filename):
                 line = lines[line_idx]
