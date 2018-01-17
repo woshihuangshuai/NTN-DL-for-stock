@@ -34,7 +34,7 @@ import os
 from nltk.tokenize import sent_tokenize
 from tqdm import tqdm
 
-import chardet
+import codecs
 
 news_resources = ['bloomberg', 'reuters']
 raw_news_dir = '../../data/raw_news/'
@@ -48,8 +48,6 @@ for news_resource in news_resources:
                             news_resource + '/*')   # 获取目录下的所有子文件夹
     pbar = tqdm(total=len(folder_list))
 
-    total = 0
-    count = 0
     for folder in folder_list:
         folder_name = folder.split('/')[-1]
         datetime = ''.join(folder_name.split('-'))
@@ -62,29 +60,17 @@ for news_resource in news_resources:
 
         for file_dir in glob.glob(folder + '/*'):
             filename = file_dir.split('/')[-1]
-            raw_news_file = open(file_dir, 'r')
-            processed_news_file = open(save_dir + filename, 'w')
-
-            lines = raw_news_file.read()
-            content = ' '.join([line.strip() for line in lines[7:]])
-            
-            content_encoding = chardet.detect(content)['encoding']    
-
-            total += 1
-            if content_encoding == 'ascii':
-                count += 1
-
-            # if content_encoding != 'utf-8':
-            #     content = content.decode(content_encoding).encode('UTF-8')
-            # print content_encoding + '----' + chardet.detect(content)['encoding']
-
-            # sent_list = sent_tokenize(content)
-            # for sent in sent_list:
-            #     processed_news_file.write(sent.lower() + '\n')
-
+  
+            raw_news_file = codecs.open(file_dir, 'r', encoding='UTF-8')
+            lines = raw_news_file.readlines()
             raw_news_file.close()
-            processed_news_file.close()
-    pbar.close()
 
-    print total
-    print count
+            content = ' '.join([line.strip().lower() for line in lines[7:]])
+            sentence_list = sent_tokenize(content)
+            
+            processed_news_file = codecs.open(save_dir + filename, 'w', encoding='UTF-8')
+            for sentence in sentence_list:
+                processed_news_file.write(sentence + '\n')
+            processed_news_file.close()
+
+    pbar.close()
