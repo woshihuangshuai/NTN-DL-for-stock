@@ -8,6 +8,7 @@
     numpy
     scipy
     NLTK
+    codecs
 
 ## Data
 ### 新闻数据
