@@ -49,6 +49,8 @@
         Step 2: english.depparser
 
 ## Issues
+    文本数据处理：
+        对于新闻文本数据，在代码中统一使用unicode编码进行所有操作
 
     extract-event.py:
         zpar的提取结果中大量不完整单词，提取代码有问题，需要修复。
