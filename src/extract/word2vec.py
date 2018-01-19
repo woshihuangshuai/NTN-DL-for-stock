@@ -86,7 +86,10 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
                             # word-embeddings of one day's events 
                         ]
     '''
+
+    word_embedding_dic = {}
     event_embedding_dic = {}
+
     for file in event_file_list:
         print 'Transforming %s event into word-embedding.' % file
         with codecs.open(file, 'r', encoding='UTF-8') as event_file:
@@ -111,7 +114,10 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
                     sum = np.zeros(100)
                     for word in words:
                         try:
-                            sum += model.wv[word]
+                            word_embedding = model.wv[word]
+                            sum += word_embedding
+                            if word not in word_embedding_dic.keys():
+                                word_embedding_dic[word] = word_embedding
                         except:
                             length -= 1
                             # TODO 不能向量化的单词用随机初始化的向量表示
@@ -151,6 +157,17 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
         npzfile = datetime + '.npy'
         np.save(save_dir + npzfile, event_embedding_dic[datetime])
 
+    # save word-embedding dictionary
+    word_embedding_dic_save_dir = '../../data/event_embedding/word_embedding_dictionary/'
+    if os.path.exists(word_embedding_dic_save_dir) = False:
+        os.makedirs(word_embedding_dic_save_dir)
+
+    word_embedding_list = []
+    for key in word_embedding_dic.keys():
+        word_embedding_list.append(word_embedding_dic[key])
+    dic_npzfile = 'news_title_word_embedding_dictionary.npy'
+    np.save(word_embedding_dic_save_dir + dic_npzfile, word_embedding_list)
+
 
 def get_event_embedding_from_news_content_event():
     print 'Transforming all news event to event_embedding.'
@@ -189,12 +206,15 @@ def event2VecAllNews(model, event_file_list, save_dir):
                             # event-embeddings of one day 
                         ]
     '''
+
+    word_embedding_dic = {}
     event_embedding_dic = {}
+
     for file_idx in trange(len(event_file_list), desc='Main progress'):
         file = event_file_list[file_idx]
         filename = file.split('/')[-1]
         event_embedding_list = []
-        
+
         with codecs.open(file, 'r', encoding='UTF-8') as event_file:
             lines = event_file.readlines()
             for line_idx in trange(len(lines), desc='%s' % filename):
@@ -217,7 +237,10 @@ def event2VecAllNews(model, event_file_list, save_dir):
                     sum = np.zeros(100)
                     for word in words:
                         try:
-                            sum += model.wv[word]
+                            word_embedding = model.wv[word]
+                            sum += word_embedding
+                            if word not in word_embedding_dic.keys():
+                                word_embedding_dic[word] = word_embedding
                         except:
                             length -= 1
                             # TODO 不能向量化的单词用随机初始化的向量表示
@@ -227,7 +250,7 @@ def event2VecAllNews(model, event_file_list, save_dir):
 
                 event_embedding_list.append(event_embedding)
                 line = event_file.readline()
-                
+
         event_embedding_dic[filename] = event_embedding_list
 
     # # Normalization
@@ -254,6 +277,17 @@ def event2VecAllNews(model, event_file_list, save_dir):
     for datetime in event_embedding_dic.keys():
         npzfile = datetime + '.npy'
         np.save(save_dir + npzfile, event_embedding_dic[datetime])
+
+    # save word-embedding dictionary
+    word_embedding_dic_save_dir = '../../data/event_embedding/word_embedding_dictionary/'
+    if os.path.exists(word_embedding_dic_save_dir) = False:
+        os.makedirs(word_embedding_dic_save_dir)
+
+    word_embedding_list = []
+    for key in word_embedding_dic.keys():
+        word_embedding_list.append(word_embedding_dic[key])
+    dic_npzfile = 'news_content_word_embedding_dictionary.npy'
+    np.save(word_embedding_dic_save_dir + dic_npzfile, word_embedding_list)
 
 
 if __name__ == '__main__':
