@@ -19,6 +19,7 @@ from NeuralTensorLayer import NeuralTensorLayer, contrastive_max_margin
 
 
 class TrainDataGenerator(object):
+    '''生成训练数据, 来自新闻正文中获取的event-embedding'''
 
     def __init__(self):
         self.news_title_EM_dir = '../../data/event_embedding/news_title/'
@@ -32,17 +33,29 @@ class TrainDataGenerator(object):
             input2 = [em[1] for em in all_news_EM]
             input3 = [em[2] for em in all_news_EM]
 
-            if os.path.exists(self.news_title_EM_dir + filename) == True:
-                news_title_EM = np.load(self.news_title_EM_dir + filename)
-                input1_extend = [em[0] for em in news_title_EM]
-                input2_extend = [em[1] for em in news_title_EM]
-                input3_extend = [em[2] for em in news_title_EM]
-                input1.extend(input1_extend)
-                input2.extend(input2_extend)
-                input3.extend(input3_extend)
+            date_time = filename.split('.')[0]
+            yield date_time, input1, input2, input3
+            # TODO 每次只迭代一组输入
+
+
+class PredictDataGenerator(object):
+    '''生成测试数据, 从新闻标题中获取的event-embedding'''
+
+    def __init__(self):
+        self.news_title_EM_dir = '../../data/event_embedding/news_title/'
+
+    def __iter__(self):
+        for file in glob.glob(self.news_title_EM_dir + '*'):
+            filename = file.split('/')[-1]
+            news_title_EM = np.load(file)
+
+            input1 = [em[0] for em in news_title_EM]
+            input2 = [em[1] for em in news_title_EM]
+            input3 = [em[2] for em in news_title_EM]
 
             date_time = filename.split('.')[0]
-            yield date_time, input1, input2, input3  # 每次生成的input中包含了从当天的新闻标题和新闻正文中提取到的所有事件
+            yield date_time, input1, input2, input3
+            # TODO 每次只迭代一组输入
 
 
 def neuralTensorNetwork(input_dim=100, output_dim=10):
@@ -65,7 +78,7 @@ def neuralTensorNetwork(input_dim=100, output_dim=10):
                           V_regularizer=l2(0.0001), b_regularizer=l2(0.0001))([R_1, R_2])
 
     # p layer is used for training the network.
-    p = Dense(output_dim=1, activation='tanh')(U)
+    p = Dense(output_dim=1)(U)
 
     # Use this model to train the network
     train_model = Model(input=[input1, input2, input3], output=p)
@@ -80,6 +93,7 @@ def neuralTensorNetwork(input_dim=100, output_dim=10):
 
 
 def trainNTN(model):
+    '''No use'''
     dataGenerator = TrainDataGenerator()
     for input1, input2, input3 in dataGenerator:
         label = model.predict_on_batch(
@@ -87,7 +101,6 @@ def trainNTN(model):
         random.shuffle(input1)
         model.train_on_batch(
             [np.array(input1), np.array(input2), np.array(input3)], label)
-
     print model.get_weights()
 
 
@@ -96,47 +109,60 @@ if __name__ == '__main__':
         第一次训练的label如何产生：    1、使用随机初始化的网络进行一次predict
                                    2、使用随机值
 
-        train_on_batch
-        predict_on_batch
-
         用**正确**的event-embedding产生lable
         用**错误**的event-embedding和lable训练网络
 
         输出结果： p层的输出：为了训练而添加的层
                  U层的输出：神经张量网络输出的结果
     '''
-    train_model, predict_model = neuralTensorNetwork()
 
+    print 'Buliding model'
+    train_model, predict_model = neuralTensorNetwork()
     print 'Train model summary:'
     train_model.summary()
     print 'Predict model summary:'
     predict_model.summary()
 
-    for i in range(500):  # epoch(N)=500
+    print 'Training model'
+    word_embedding_array = np.load(
+        '../../data/event_embedding/word_embedding_dictionary/news_content_word_embedding_dictionary.npy')
+    print type(word_embedding_dictionary)
+
+    for i in range(500):  # epoch(N)=500, batch_size = 1
         print 'epoch: %d' % i
-        dataGenerator = TrainDataGenerator()
-        for date_time, input1, input2, input3 in dataGenerator:
-            label = train_model.predict_on_batch(
-                [np.array(input1), np.array(input2), np.array(input3)])
-            for item in input1:
-                random.shuffle(item)
+        train_data_generator = TrainDataGenerator()
+        for date_time, input1, input2, input3 in train_data_generator:
+            label = train_model.predict_on_batch([np.array(input1), np.array(input2), np.array(input3)])
+            
+            array_length = len(word_embedding_array)
+            idx_matrix = [np.random.randint(low=0, high=array_length, size=3).tolist() for i in range(len(input1))]
+            corrupt_input1 = []
+            for idx_array in idx_matrix:
+                corrupt_input = np.zeros(3)
+                for idx in idx_array:
+                    corrupt_input += word_embedding_array[idx]
+                corrupt_input = corrupt_input / 3
+                corrupt_input1.append(corrupt_input)
+            
             train_model.train_on_batch(
-                [np.array(input1), np.array(input2), np.array(input3)], label)
+                [np.array(corrupt_input1), np.array(input2), np.array(input3)], label)
     # print train_model.get_weights()
 
+    print 'Predicting result'
     date_list = []
     result_list = []
-    for date_time, input1, input2, input3 in dataGenerator:
+    predict_data_generator = PredictDataGenerator()
+    for date_time, input1, input2, input3 in predict_data_generator:
         label = predict_model.predict_on_batch(
             [np.array(input1), np.array(input2), np.array(input3)])
         result = np.mean(label, axis=0)
         result_list.append(result.tolist())
         date_list.append(date_time)
-
     result_array = np.array(result_list)
-    # result_array = (result_array - result_array.min(axis=0))/(result_array.max(axis=0) - result_array.min(axis=0)) # 结果归一化
+    # result_array = (result_array - result_array.min(axis=0))/(result_array.max(axis=0) - result_array.min(axis=0))  # Normalization
     result_list = result_array.tolist()
 
+    print 'Persistence'
     ntn_result_file_dir = '../../data/ntn_result'
     with open(ntn_result_file_dir, 'w') as ntn_result_file:
         for date, result in zip(date_list, result_list):
