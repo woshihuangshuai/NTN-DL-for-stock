@@ -15,7 +15,9 @@ from keras.regularizers import ActivityRegularizer, Regularizer
 
 
 class NeuralTensorLayer(Layer):
-
+    '''
+    每个张量层中包含两部分：一个张量和一个标准的前向传播神经网络
+    '''
     def __init__(self, output_dim, input_dim=None, W_regularizer=None, V_regularizer=None,
                  b_regularizer=None, activity_regularizer=None, **kwargs):
         self.output_dim = output_dim  # k
@@ -43,9 +45,9 @@ class NeuralTensorLayer(Layer):
         initial_V_values = stats.truncnorm.rvs(
             -2 * std, 2 * std, loc=mean, scale=std, size=(2 * d, k))
 
-        self.W = K.variable(initial_W_values)
-        self.V = K.variable(initial_V_values)
-        self.b = K.zeros((self.input_dim,))
+        self.W = K.variable(initial_W_values)  # neural tensor network's parameters
+        self.V = K.variable(initial_V_values)  # feed-forward neural network's parameters
+        self.b = K.zeros((self.input_dim,))  # bias parameters
         self.trainable_weights = [self.W, self.V, self.b]
 
         self.regularizers = []
@@ -82,11 +84,10 @@ class NeuralTensorLayer(Layer):
 
         bilinear_tensor_products = []
         for i in range(k):
-            bilinear_tensor_products.append(
-                K.sum((e2 * K.dot(e1, self.W[i])) + self.b, axis=1))
+            bilinear_tensor_products.append(e2 * K.dot(e1, self.W[i]))
 
         result = K.tanh(K.reshape(K.concatenate(
-            bilinear_tensor_products, axis=0), (batch_size, k)) + feed_forward_product)
+            bilinear_tensor_products, axis=0), (batch_size, k)) + feed_forward_product + self.b)
         # print(result)
         return result
 
