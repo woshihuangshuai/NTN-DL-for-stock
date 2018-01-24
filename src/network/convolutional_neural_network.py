@@ -154,7 +154,7 @@ def RandomDataGenerator(length, network_input_dim):
     # TODO 随机生成训练和测试数据的方法
     dataset = np.random.rand(length, 30, network_input_dim)
     label = np_utils.to_categorical(
-        np.random.randint(0, 2, 3000), nb_classes=2)
+        np.random.randint(0, 2, length), nb_classes=2)
     return dataset.tolist(), label.tolist()
 
 

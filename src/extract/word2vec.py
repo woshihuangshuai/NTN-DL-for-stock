@@ -245,7 +245,10 @@ def event2VecAllNews(model, event_file_list, save_dir):
                             length -= 1
                             # TODO 不能向量化的单词用随机初始化的向量表示
                             continue
-                    mean = sum / length
+                    if length != 0:
+                        mean = sum / length
+                    else:
+                        mean = sum
                     event_embedding.append(mean)
 
                 event_embedding_list.append(event_embedding)
