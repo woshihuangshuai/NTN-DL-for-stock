@@ -3,7 +3,7 @@ dirlist=`find ../../data/processed_news/* -type d`
 save_dir="../../data/merged_processed_news/"
 
 if [ ! -d "../../data/merged_processed_news/" ]; then
- mkdir ../../data/merged_news/
+ mkdir ../../data/merged_processed_news/
 fi
 
 for dir in $dirlist
@@ -22,7 +22,7 @@ dirlist=`find ../../data/raw_news/* -type d`
 save_dir="../../data/merged_raw_news/"
 
 if [ ! -d "../../data/merged_raw_news/" ]; then
- mkdir ../../data/merged_news/
+ mkdir ../../data/merged_raw_news/
 fi
 
 for dir in $dirlist
