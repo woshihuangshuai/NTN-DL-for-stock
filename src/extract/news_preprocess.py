@@ -36,24 +36,33 @@ from tqdm import tqdm
 
 import codecs
 
-news_resources = ['bloomberg', 'reuters']
-raw_news_dir = '../../data/raw_news/'
-processed_news_dir = '../../data/processed_news/'
+news_resources      = ['bloomberg', 'reuters']
+dataset_dir         = '../../data/dataset/'
 
+raw_news_dir        = '../../data/raw_news/'
+processed_news_dir  = '../../data/processed_news/'
+
+
+if os.path.exists(raw_news_dir) == False:
+    os.makedirs(raw_news_dir)
 if os.path.exists(processed_news_dir) == False:
     os.makedirs(processed_news_dir)
 
 for news_resource in news_resources:
-    folder_list = glob.glob(raw_news_dir + '%s' %
+    folder_list = glob.glob(dataset_dir + '%s' %
                             news_resource + '/*')   # 获取目录下的所有子文件夹
     pbar = tqdm(total=len(folder_list))
-
     for folder in folder_list:
         folder_name = folder.split('/')[-1]
         datetime = ''.join(folder_name.split('-'))
-        save_dir = processed_news_dir + datetime + '/'
-        if os.path.exists(save_dir) == False:
-            os.makedirs(save_dir)
+        
+        processed_news_save_dir = processed_news_dir + datetime + '/'
+        if os.path.exists(processed_news_save_dir) == False:
+            os.makedirs(processed_news_save_dir)
+
+        raw_news_save_dir = raw_news_dir + datetime + '/'
+        if os.path.exists(raw_news_save_dir) == False:
+            os.makedirs(raw_news_save_dir)
 
         pbar.set_description('Processing %s in %s' % (datetime, news_resource))
         pbar.update(1)
@@ -61,14 +70,25 @@ for news_resource in news_resources:
         for file_dir in glob.glob(folder + '/*'):
             filename = file_dir.split('/')[-1]
   
-            raw_news_file = codecs.open(file_dir, 'r', encoding='UTF-8')
-            lines = raw_news_file.readlines()
+            news_file_in_dataset = codecs.open(file_dir, 'r', encoding='UTF-8')
+            lines = news_file_in_dataset.readlines()
+            news_file_in_dataset.close()
+
+            # 将数据集中的原始新闻文件移动到一个新的目录，目的是将reuters和bloomberg的新闻合并的一个目录下
+            raw_news_file = codecs.open(
+                raw_news_save_dir + filename, 'w', encoding='UTF-8')
+            for line in lines:
+                raw_news_file.write(line)
             raw_news_file.close()
 
-            content = ' '.join([line.strip().lower() for line in lines[7:]])
+            # 使用NLTK进行句子切分
+            # content = ' '.join([line.strip().lower() for line in lines[7:]])
+            content = ' '.join([line.strip() for line in lines[7:]])    # 不将句子中的所有字母转换成小写，测试结果 
             sentence_list = sent_tokenize(content)
             
-            processed_news_file = codecs.open(save_dir + filename, 'w', encoding='UTF-8')
+            # 将处理的后新闻文件保存的一个新的目录下
+            processed_news_file = codecs.open(
+                processed_news_save_dir + filename, 'w', encoding='UTF-8')
             for sentence in sentence_list:
                 processed_news_file.write(sentence + '\n')
             processed_news_file.close()
