@@ -33,6 +33,8 @@ print 'Pad sequences...'
 print 'Build model...'
 model = Sequential()
 model.add(LSTM(64, dropout_W=0.2, dropout_U=0.2, input_shape=(30, 100)))
+model.add(Dense(32))
+model.add(Activation('sigmoid'))
 model.add(Dense(1))
 model.add(Activation('sigmoid'))
 
