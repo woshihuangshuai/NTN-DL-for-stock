@@ -2,7 +2,7 @@
 dirlist=`find ../../data/processed_news/* -type d`
 save_dir="../../data/merged_processed_news/"
 
-if [ ! -d "../../data/merged_news/" ]; then
+if [ ! -d "../../data/merged_processed_news/" ]; then
  mkdir ../../data/merged_news/
 fi
 
