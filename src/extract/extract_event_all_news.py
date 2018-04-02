@@ -37,26 +37,16 @@ for file_idx in file_idx_list:
         c = 0
         line = reverb_file.readline()
         while line:
-            items = line.split('\t')
+            items = line.split('\t')        
             
-            arg1 =      [re.sub(r'[^a-z]+', ' ', t.lower().strip()) for t in items[2].split()]
-            tmp_list = []
-            for item in arg1:
-                if len(item) > 1:
-                    tmp_list.append(item)
-            arg1 = tmp_list
-            relation =  [re.sub(r'[^a-z]+', ' ', t.lower().strip()) for t in items[3].split()]
-            tmp_list = []
-            for item in relation:
-                if len(item) > 1:
-                    tmp_list.append(item)
-            relation = tmp_list
-            arg2 =      [re.sub(r'[^a-z]+', ' ', t.lower().strip()) for t in items[4].split()]
-            tmp_list = []
-            for item in arg2:
-                if len(item) > 1:
-                    tmp_list.append(item)
-            arg2 = tmp_list
+            arg1_str = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
+            arg1 = [t for t in arg1_str.split()] if len(t) > 1]
+
+            relation_str = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
+            relation = [t for t in relation_str.split() if len(t) > 1]
+
+            arg2_str = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
+            arg2 = [t for t in arg2_str.split() if len(t) > 1]
 
             if len(arg1) > 0 and len(relation) > 0 and len(arg2)> 0:
                 reverb_extract_set.add((' '.join(arg1), ' '.join(relation), ' '.join(arg2)))
