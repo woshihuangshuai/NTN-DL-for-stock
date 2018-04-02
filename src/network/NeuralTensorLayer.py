@@ -47,7 +47,7 @@ class NeuralTensorLayer(Layer):
 
         self.W = K.variable(initial_W_values)  # neural tensor network's parameters
         self.V = K.variable(initial_V_values)  # feed-forward neural network's parameters
-        self.b = K.zeros((self.input_dim,))  # bias parameters
+        self.b = K.zeros((self.output_dim,))  # bias parameters
         self.trainable_weights = [self.W, self.V, self.b]
 
         self.regularizers = []
