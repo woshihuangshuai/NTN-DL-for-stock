@@ -38,12 +38,28 @@ for file_idx in file_idx_list:
         line = reverb_file.readline()
         while line:
             items = line.split('\t')
-            arg1        = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
-            relation    = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
-            arg2        = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
+            
+            arg1 =      [re.sub(r'[^a-z]+', ' ', t.lower().strip()) for t in items[2].split()]
+            tmp_list = []
+            for item in arg1:
+                if len(item) > 1:
+                    tmp_list.append(item)
+            arg1 = tmp_list
+            relation =  [re.sub(r'[^a-z]+', ' ', t.lower().strip()) for t in items[3].split()]
+            tmp_list = []
+            for item in relation:
+                if len(item) > 1:
+                    tmp_list.append(item)
+            relation = tmp_list
+            arg2 =      [re.sub(r'[^a-z]+', ' ', t.lower().strip()) for t in items[4].split()]
+            tmp_list = []
+            for item in arg2:
+                if len(item) > 1:
+                    tmp_list.append(item)
+            arg2 = tmp_list
 
-            if arg1 != '' and relation != '' and arg2 != '':
-                reverb_extract_set.add((arg1, relation, arg2))
+            if len(arg1) > 0 and len(relation) > 0 and len(arg2)> 0:
+                reverb_extract_set.add((' '.join(arg1), ' '.join(relation), ' '.join(arg2)))
                 c += 1
             line = reverb_file.readline()
         # print(len(reverb_extract_set))
@@ -92,7 +108,6 @@ for file_idx in file_idx_list:
                 if len(sub) != 0 and len(predicate) != 0 and len(obj) != 0:
                     zpar_extract_set.add((sub, predicate, obj))
                     c += 1
-
                 items = []
                 line = zpar_file.readline()
         # print(len(reverb_extract_set))
@@ -123,12 +138,9 @@ for file_idx in file_idx_list:
         os.makedirs(save_dir)
     f = open(save_dir + file_idx, 'w')
     for event in event_list:
-        s = event[0]
-        for arg in event[1:]:
-            s += ',' + arg
-        f.write(s + '\n')
+        event_str = ','.join(event)
+        f.write(event_str + '\n')
     f.close()
     total += len(event_list)
     print('Total of event in %s: %d.' % (file_idx, len(event_list)))
-    print('Total of event: %d' % total)
-# print('Total of event: %d' % total)
+print('Total of event: %d' % total)
