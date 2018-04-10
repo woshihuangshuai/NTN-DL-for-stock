@@ -20,18 +20,25 @@ for resource in data_resource:
 
     print('Extracting %s...' % resource)
 
-    # extract (arg1, rel, arg2)
+    # extract (arg1, rel, arg2) result of ReVerb
     with open(data_dir + '%s_reverb_result_v1.txt' % resource, 'r') as reverb_result_file:
         c = 0
         line = reverb_result_file.readline()
         while line:
             items = line.split('\t')
-            arg1 = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
-            relation = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
-            arg2 = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
+
+            arg1_str = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
+            arg1 = [t for t in arg1_str.split() if len(t) > 1]
+
+            relation_str = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
+            relation = [t for t in relation_str.split() if len(t) > 1]
+
+            arg2_str = re.sub(r'[^a-z]+', ' ', items[4].lower()).strip()
+            arg2 = [t for t in arg2_str.split() if len(t) > 1]
+
             datetime = items[12].split()[0]
 
-            if datetime != '' and arg1 != '' and relation != '' and arg2 != '':
+            if len(datetime) > 0 and len(arg1) > 0 and len(relation) > 0 and len(arg2)> 0:
                 if re.match(r'[0-9]{8}', datetime) != None:
                     if datetime not in reverb_dict.keys():
                         reverb_dict[datetime] = [(arg1, relation, arg2)]
@@ -43,7 +50,7 @@ for resource in data_resource:
         # print(len(reverb_dict.keys()))
         print('total of (arg1, relation, arg2): %d.' % c)
 
-    # extract (sub, predicate, obj)
+    # extract (sub, predicate, obj) result of ZPar
     with open(data_dir + '%s_zpar_dep_result.txt' % resource, 'r') as zpar_result_file:
         c = 0
         items = []
@@ -162,10 +169,8 @@ for resource in data_resource:
         os.makedirs(save_dir)
     f = open(save_dir + '%s_event.txt' % resource, 'w')
     for event in event_list:
-        s = event[0]
-        for arg in event[1:]:
-            s += ',' + arg
-        f.write(s + '\n')
+        event_str = ','.join(event)
+        f.write(event_str + '\n')
     f.close()
     total += len(event_list)
     print('total of event in %s: %d.' % (resource, len(event_list)))
