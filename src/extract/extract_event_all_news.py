@@ -40,7 +40,7 @@ for file_idx in file_idx_list:
             items = line.split('\t')        
             
             arg1_str = re.sub(r'[^a-z]+', ' ', items[2].lower()).strip()
-            arg1 = [t for t in arg1_str.split()] if len(t) > 1]
+            arg1 = [t for t in arg1_str.split() if len(t) > 1]
 
             relation_str = re.sub(r'[^a-z]+', ' ', items[3].lower()).strip()
             relation = [t for t in relation_str.split() if len(t) > 1]
