@@ -22,7 +22,7 @@ class Mysentences(object):
     """sentences iterator"""
 
     def __init__(self):
-        self.news_dir = '../../data/merged_news/'
+        self.news_dir = '../../data/merged_raw_news/'
 
     def __iter__(self):
         for news_dir in glob.glob(self.news_dir + '/*'):
