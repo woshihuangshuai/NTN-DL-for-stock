@@ -22,10 +22,10 @@ class TrainDataGenerator(object):
     '''生成训练数据, 来自新闻正文中获取的event-embedding'''
 
     def __init__(self):
-        self.news_title_EM_dir = '../../data/event_embedding/news_title/'
         self.all_news_EM_dir = '../../data/event_embedding/all_news/'
 
     def __iter__(self):
+        '''每次yield一个日期内的所有EM向量'''
         for file in glob.glob(self.all_news_EM_dir + '*'):
             filename = file.split('/')[-1]
             all_news_EM = np.load(file)
@@ -35,7 +35,6 @@ class TrainDataGenerator(object):
 
             date_time = filename.split('.')[0]
             yield date_time, input1, input2, input3
-            # TODO 每次只迭代一组输入
 
 
 class PredictDataGenerator(object):
@@ -55,7 +54,6 @@ class PredictDataGenerator(object):
 
             date_time = filename.split('.')[0]
             yield date_time, input1, input2, input3
-            # TODO 每次只迭代一组输入
 
 
 def neuralTensorNetwork(input_dim=100, output_dim=10):
@@ -155,7 +153,7 @@ if __name__ == '__main__':
     for date_time, input1, input2, input3 in predict_data_generator:
         label = predict_model.predict_on_batch(
             [np.array(input1), np.array(input2), np.array(input3)])
-        result = np.mean(label, axis=0)
+        result = np.mean(label, axis=0) # 对当天的所有事件向量求平均
         result_list.append(result.tolist())
         date_list.append(date_time)
     result_array = np.array(result_list)
