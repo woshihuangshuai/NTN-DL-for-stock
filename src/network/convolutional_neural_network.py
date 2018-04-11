@@ -4,6 +4,8 @@
 
 import csv
 import datetime
+import glob
+import os
 
 import numpy as np
 from keras import backend as K
@@ -12,6 +14,8 @@ from keras.layers import (Conv2D, Dense, Flatten, Input, MaxPooling2D, Merge,
 from keras.models import Model
 from keras.utils import np_utils
 
+from prettytable import PrettyTable
+
 
 '''
     short_term_input    = U1
@@ -19,77 +23,92 @@ from keras.utils import np_utils
     long_term_input     = [U1 ~ U30]
 '''
 
-
-class DataGenerator(object):
-    '''
-        Event-embedding数据:
-        股票走势label:
-    '''
-
-    def __init__(self):
-        self.ntn_result_file_dir = '../../data/ntn_result'
-        self.historical_stock_data_file_dir = '../../data/SP500.csv'
-        self.ntn_result = {}  # ntn网络产生的中间结果
-        self.stock_trend = {}  # 每天的股票价格趋势
-        self.date_period = 30  # 时间周期
-        # 下面三个列表中的元素已有对应
-        self.date_list = []  # 日期列表
-        self.input_data = []  # 输入数据
-        self.label_data = []  # 标签
-
-        self.output_dim = 3
-
-    def get_data(self):
-        self.parse_date_file()
-        # 开始的三十天因为历史新闻数据不足，所以从30天后开始
-        min_date = min(self.ntn_result.keys())
-        start_date = datetime.datetime.strptime(
-            min_date, '%Y%m%d') + datetime.timedelta(days=self.date_period)
-        start_date = start_date.strftime('%Y%m%d')
-        for date_time_str in self.stock_trend.keys():
-            if date_time_str < start_date:
-                continue
-            self.date_list.append(date_time_str)
-            thirty_days_EM = []
-            current_date = datetime.datetime.strptime(date_time_str, '%Y%m%d')
-            for i in range(self.date_period):
-                date_idx = (
-                    current_date - datetime.timedelta(days=(i + 1))).strftime('%Y%m%d')
-                if date_idx in self.ntn_result.keys():
-                    thirty_days_EM.append(self.ntn_result[date_idx])
-                else:
-                    thirty_days_EM.append([0.0] * self.output_dim)
-            self.input_data.append(thirty_days_EM)
-            self.label_data.append(self.stock_trend[date_time_str])
-        return self.date_list, self.input_data, self.label_data
-
-    def parse_date_file(self):
-        with open(self.ntn_result_file_dir, 'r') as ntn_result_file:
+def get_event_embedding_dic():
+    event_embedding_dic = {}  # ntn网络产生的中间结果
+    with open('../../data/ntn_result', 'r') as ntn_result_file:
+        line = ntn_result_file.readline()
+        while line:
+            items = line.split()
+            self.event_embedding_dic[items[0]] = [
+                float(items[1]), float(items[2]), float(items[3])]
             line = ntn_result_file.readline()
-            while line:
-                items = line.split()
-                self.ntn_result[items[0]] = [
-                    float(items[1]), float(items[2]), float(items[3])]
-                line = ntn_result_file.readline()
-        with open(self.historical_stock_data_file_dir, 'r') as historical_stock_data_file:
-            historical_stock_data_csv_file = csv.reader(
-                historical_stock_data_file)
-            header = historical_stock_data_csv_file.next()
-            line = historical_stock_data_csv_file.next()
-            while line:
-                date_time = datetime.datetime.strptime(
-                    line[0], '%Y-%m-%d').strftime('%Y%m%d')
-                closing_price = float(line[-3])
-                # 前一天的价格
-                try:
-                    line = historical_stock_data_csv_file.next()
-                except StopIteration:
-                    break
-                the_day_before_closing_price = float(line[-3])
-                trend = [
-                    1, 0] if closing_price > the_day_before_closing_price else [0, 1]
-                self.stock_trend[date_time] = trend
+    return event_embedding_dic
 
+
+def get_historical_price_trend(historical_price_data_dir):
+    stock_trend_dic = {}  # 每天的股票价格趋势
+    with open(historical_price_data_dir, 'r') as historical_price_data_file:
+        historical_price_data_csv_file = csv.reader(
+            historical_price_data_file)
+        header = historical_price_data_csv_file.next()
+        line = historical_price_data_csv_file.next()
+        while line:
+            date_time = datetime.datetime.strptime(
+                line[0], '%Y-%m-%d').strftime('%Y%m%d')
+            closing_price = float(line[-3])
+            # 前一天的价格
+            try:
+                line = historical_price_data_csv_file.next()
+            except StopIteration:
+                break
+            the_day_before_closing_price = float(line[-3])
+            trend = [
+                1, 0] if closing_price > the_day_before_closing_price else [0, 1]
+            stock_trend_dic[date_time] = trend
+    return stock_trend_dic
+
+
+def generate_data_sequence(event_embedding_dic, stock_trend_dic):
+    # 开始的三十天因为历史新闻数据不足，所以从30天后开始
+    EM_length = 3 # 事件向量的长度
+    input_data = []  # 输入数据
+    label_data = []  # 标签
+    
+    min_date = min(event_embedding_dic.keys())
+    start_date = datetime.datetime.strptime(
+        min_date, '%Y%m%d') + datetime.timedelta(days=30)
+    start_date = start_date.strftime('%Y%m%d')
+    for date_time_str in stock_trend_dic.keys():
+        if date_time_str < start_date:
+            continue
+        thirty_days_EM = []
+        current_date = datetime.datetime.strptime(date_time_str, '%Y%m%d')
+        for i in range(self.date_period):
+            date_idx = (
+                current_date - datetime.timedelta(days=(i + 1))).strftime('%Y%m%d')
+            if date_idx in event_embedding_dic.keys():
+                thirty_days_EM.append(event_embedding_dic[date_idx])
+            else:
+                thirty_days_EM.append([0.0] * EM_length)
+        input_data.append(thirty_days_EM)
+        label_data.append(stock_trend_dic[date_time_str])
+    return input_data, label_data
+
+
+def get_train_and_test_data_sequence(event_embedding_dic, stock_trend_dic, data_split=0.2):
+    input_data, label_data = generate_data_sequence(event_embedding_dic, stock_trend_dic)
+    t = int(len(label_data) * (1-data_split))
+    train_input_sequence = input_data[:t]
+    train_label_sequence = label_data[:t]
+    test_input_sequence = input_data[t:]
+    test_label_sequence = label_data[t:]
+
+    # train data
+    train_input1 = np.array([item[0] for item in train_input_sequence])
+    train_input2 = np.array([item[:7] for item in train_input_sequence])
+    train_input3 = np.array(train_input_sequence)
+    train_label = np.array(train_label_sequence)
+    train_input_array_list = [train_input1, train_input2, train_input3]
+
+    # test data
+    test_input1 = np.array([item[0] for item in test_input_sequence])
+    test_input2 = np.array([item[:7] for item in test_input_sequence])
+    test_input3 = np.array(test_input_sequence)
+    test_label = np.array(test_label_sequence)
+    test_input_array_list = [test_input1, test_input2, test_input3]
+
+    return train_input_array_list, train_label, test_input_array_list, test_label
+    
 
 def deepPredictionModel(input_dim=3, output_dim=2):
     '''return a deep prediction model(CNN)'''
@@ -143,87 +162,51 @@ def deepPredictionModel(input_dim=3, output_dim=2):
     return model
 
 
-def trainCNN(model):
-    '''No use'''
-    model.fit()
-    pass
-
-
-def RandomDataGenerator(length, network_input_dim):
-    '''生成随机初始化的数据'''
-    # TODO 随机生成训练和测试数据的方法
-    dataset = np.random.rand(length, 30, network_input_dim)
-    label = np_utils.to_categorical(
-        np.random.randint(0, 2, length), nb_classes=2)
-    return dataset.tolist(), label.tolist()
-
-
 if __name__ == '__main__':
-    model = deepPredictionModel(input_dim=100)
+    model = deepPredictionModel(input_dim=10)
     model.summary()
 
-    # *********使用随机生成的数据集进行测试start*********
-    dataset, label = RandomDataGenerator(3000, 100)
-    t = int(len(label) * 0.8)
-    train_data = dataset[:t]
-    train_label = label[:t]
-    test_data = dataset[t:]
-    test_label = label[t:]
+    event_embedding_dic = get_event_embedding_dic()
 
-    # train data
-    input1_train = np.array([item[0] for item in train_data])
-    input2_train = np.array([item[:7] for item in train_data])
-    input3_train = np.array(train_data)
-    label_train = np.array(train_label)
+    historical_price_data_file_list = ['../../data/historical_price_data/SP500.csv']
+    historical_price_data_dir = '../../data/historical_price_data/'
+    sub_folder_list = ['high_rank', 'middle_rank', 'low_rank']
+    for sub_folder in sub_folder_list:
+        for f in glob.glob(historical_price_data_dir + sub_folder + '/*'):
+            historical_price_data_file_list.append(f)
 
-    # test data
-    input1_test = np.array([item[0] for item in test_data])
-    input2_test = np.array([item[:7] for item in test_data])
-    input3_test = np.array(test_data)
-    label_test = np.array(test_label)
+    result_table = PrettyTable(
+        ['Price data', 'Accuracy 1', 'Accuracy 2', 'Accuracy 3', 'Average accuracy'])
 
-    model.fit([input1_train, input2_train, input3_train],
-              label_train, batch_size=100, nb_epoch=500, verbose=1)
-    result = model.predict([input1_test, input2_test, input3_test])
-    print result
-
-    total = len(test_label)
-    correct = 0
-    for item in zip(result, test_label):
-        result = item[0]
-        label = item[1]
-        if result[0] > result[1]:
-            result = [1, 0]
-        else:
-            result = [0, 1]
-        if result == label:
-            correct += 1
-    print 'count of correct item:', correct
-    print 'total:', total
-    print 'accuracy:', float(correct)/float(total)
-    # *********使用随机生成的数据集进行测试end***********
-
-    # dategenerator = DataGenerator()
-    # date_list, input_data, label_data = dategenerator.get_data()
-
-    # t = int(len(input_data) * 0.9)
-    # input_train = input_data[:t]
-    # input_test = input_data[t:]
-    # label_train = label_data[:t]
-    # label_test = label_data[t:]
-
-    # # train
-    # input1_train = np.array([item[0] for item in input_train])
-    # input2_train = np.array([item[:7] for item in input_train])
-    # input3_train = np.array(input_train)
-    # label_train_array = np.array(label_train)
-    # model.fit([input1_train, input2_train, input3_train],
-    #           label_train_array, batch_size=32, nb_epoch=10, verbose=1)
-
-    # # test
-    # input1_test = np.array([item[0] for item in input_test])
-    # input2_test = np.array([item[:7] for item in input_test])
-    # input3_test = np.array(input_test)
-    # label_test_array = np.array(label_test)
-    # result = model.predict([input1_test, input2_test, input3_test])
-    # print result
+    for historical_price_data_file in historical_price_data_file_list:
+        stock_trend_dic = get_historical_price_trend(historical_price_data_file)
+        train_input_array_list, train_label, test_input_array_list, test_label \
+         = get_train_and_test_data_sequence(event_embedding_dic, stock_trend_dic)
+        
+        filename = historical_price_data_file.split('/')[-1].split('.')[0]
+        accuracy = []
+        for i in range(3): # 对于一个数据集进行三次预测求平均准确率
+            model.fit([train_input_array_list[0], train_input_array_list[1], train_input_array_list[2]],
+                    train_label, batch_size=100, nb_epoch=500, verbose=1)
+            result = model.predict(
+                [test_input_array_list[0], test_input_array_list[1], test_input_array_list[2]])
+            total = float(len(test_label))
+            correct = 0.0
+            for item in zip(result, test_label):
+                result, label = item
+                if result[0] > result[1]:
+                    result = [1, 0]
+                else:
+                    result = [0, 1]
+                if result == label:
+                    correct += 1
+            accuracy[i] = correct / total
+        average_accuracy = sum(accuracy) / len(accuracy)
+        result_table.add_row(filename, accuracy[0], accuracy[1], accuracy[2], average_accuracy)
+    # print result_table
+    # 将预测结果保存到文件中
+    result_file_dir = '../../data/predict_result/'
+    if os.path.exists(result_file_dir) = False:
+        os.makedirs(result_file_dir)
+    with open(result_file_dir + 'CNN_predict_result', 'w') as result_file:
+        result_file.write(result_table.get_string())
