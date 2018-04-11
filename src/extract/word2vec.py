@@ -122,7 +122,10 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
                             length -= 1
                             # TODO 不能向量化的单词用随机初始化的向量表示
                             continue
-                    mean = sum / length
+                    if length > 0:
+                        mean = sum / length
+                    else:
+                        mean = sum
                     event_embedding.append(mean)
 
                 if datetime not in event_embedding_dic.keys():
@@ -159,7 +162,7 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
 
     # save word-embedding dictionary
     word_embedding_dic_save_dir = '../../data/event_embedding/word_embedding_dictionary/'
-    if os.path.exists(word_embedding_dic_save_dir) = False:
+    if os.path.exists(word_embedding_dic_save_dir) == False:
         os.makedirs(word_embedding_dic_save_dir)
 
     word_embedding_list = []
@@ -283,7 +286,7 @@ def event2VecAllNews(model, event_file_list, save_dir):
 
     # save word-embedding dictionary
     word_embedding_dic_save_dir = '../../data/event_embedding/word_embedding_dictionary/'
-    if os.path.exists(word_embedding_dic_save_dir) = False:
+    if os.path.exists(word_embedding_dic_save_dir) == False:
         os.makedirs(word_embedding_dic_save_dir)
 
     word_embedding_list = []
