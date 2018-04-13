@@ -29,8 +29,7 @@ def get_event_embedding_dic():
         line = ntn_result_file.readline()
         while line:
             items = line.split()
-            self.event_embedding_dic[items[0]] = [
-                float(items[1]), float(items[2]), float(items[3])]
+            self.event_embedding_dic[items[0]] = items[1:]
             line = ntn_result_file.readline()
     return event_embedding_dic
 
@@ -60,10 +59,11 @@ def get_historical_price_trend(historical_price_data_dir):
 
 def generate_data_sequence(event_embedding_dic, stock_trend_dic):
     # 开始的三十天因为历史新闻数据不足，所以从30天后开始
-    EM_length = 3 # 事件向量的长度
+    EM_length = 10 # 事件向量的长度
     input_data = []  # 输入数据
     label_data = []  # 标签
-    
+    date_period = 30
+
     min_date = min(event_embedding_dic.keys())
     start_date = datetime.datetime.strptime(
         min_date, '%Y%m%d') + datetime.timedelta(days=30)
@@ -73,7 +73,7 @@ def generate_data_sequence(event_embedding_dic, stock_trend_dic):
             continue
         thirty_days_EM = []
         current_date = datetime.datetime.strptime(date_time_str, '%Y%m%d')
-        for i in range(self.date_period):
+        for i in range(date_period):
             date_idx = (
                 current_date - datetime.timedelta(days=(i + 1))).strftime('%Y%m%d')
             if date_idx in event_embedding_dic.keys():
@@ -184,7 +184,7 @@ if __name__ == '__main__':
          = get_train_and_test_data_sequence(event_embedding_dic, stock_trend_dic)
         
         filename = historical_price_data_file.split('/')[-1].split('.')[0]
-        accuracy = []
+        accuracy = [0.0] * 3
         for i in range(3): # 对于一个数据集进行三次预测求平均准确率
             model.fit([train_input_array_list[0], train_input_array_list[1], train_input_array_list[2]],
                     train_label, batch_size=100, nb_epoch=500, verbose=1)
@@ -192,7 +192,7 @@ if __name__ == '__main__':
                 [test_input_array_list[0], test_input_array_list[1], test_input_array_list[2]])
             total = float(len(test_label))
             correct = 0.0
-            for item in zip(result, test_label):
+            for item in zip(result, test_label.tolist()):
                 result, label = item
                 if result[0] > result[1]:
                     result = [1, 0]
@@ -202,11 +202,11 @@ if __name__ == '__main__':
                     correct += 1
             accuracy[i] = correct / total
         average_accuracy = sum(accuracy) / len(accuracy)
-        result_table.add_row(filename, accuracy[0], accuracy[1], accuracy[2], average_accuracy)
+        result_table.add_row([filename, accuracy[0], accuracy[1], accuracy[2], average_accuracy])
     # print result_table
     # 将预测结果保存到文件中
     result_file_dir = '../../data/predict_result/'
-    if os.path.exists(result_file_dir) = False:
+    if os.path.exists(result_file_dir) == False:
         os.makedirs(result_file_dir)
     with open(result_file_dir + 'CNN_predict_result', 'w') as result_file:
         result_file.write(result_table.get_string())
