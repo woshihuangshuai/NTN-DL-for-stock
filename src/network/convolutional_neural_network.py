@@ -29,7 +29,7 @@ def get_event_embedding_dic():
         line = ntn_result_file.readline()
         while line:
             items = line.split()
-            self.event_embedding_dic[items[0]] = items[1:]
+            event_embedding_dic[items[0]] = items[1:]
             line = ntn_result_file.readline()
     return event_embedding_dic
 
@@ -183,7 +183,7 @@ if __name__ == '__main__':
         train_input_array_list, train_label, test_input_array_list, test_label \
          = get_train_and_test_data_sequence(event_embedding_dic, stock_trend_dic)
         
-        filename = historical_price_data_file.split('/')[-1].split('.')[0]
+        filename = '/'.join(historical_price_data_file.split('/')[-2:]).split('.')[0]
         accuracy = [0.0] * 3
         for i in range(3): # 对于一个数据集进行三次预测求平均准确率
             model.fit([train_input_array_list[0], train_input_array_list[1], train_input_array_list[2]],
