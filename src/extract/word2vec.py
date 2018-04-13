@@ -120,12 +120,13 @@ def event2VecNewsTitle(model, event_file_list, save_dir):
                                 word_embedding_dic[word] = word_embedding
                         except:
                             length -= 1
-                            # TODO 不能向量化的单词用随机初始化的向量表示
                             continue
                     if length > 0:
                         mean = sum / length
                     else:
-                        mean = sum
+                        mean = np.random.randn(100)
+                        for i in range(len(mean)):
+                            mean[i] = mean[i] - int(mean[i])
                     event_embedding.append(mean)
 
                 if datetime not in event_embedding_dic.keys():
@@ -246,12 +247,13 @@ def event2VecAllNews(model, event_file_list, save_dir):
                                 word_embedding_dic[word] = word_embedding
                         except:
                             length -= 1
-                            # TODO 不能向量化的单词用随机初始化的向量表示
                             continue
                     if length != 0:
                         mean = sum / length
                     else:
-                        mean = sum
+                        mean = np.random.randn(100)
+                        for i in range(len(mean)):
+                            mean[i] = mean[i] - int(mean[i])
                     event_embedding.append(mean)
 
                 event_embedding_list.append(event_embedding)
