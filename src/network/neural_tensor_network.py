@@ -114,8 +114,11 @@ if __name__ == '__main__':
                  U层的输出：神经张量网络输出的结果
     '''
 
+    ntn_input_dim = 100
+    ntn_output_dim = 100
+
     print 'Buliding model'
-    train_model, predict_model = neuralTensorNetwork()
+    train_model, predict_model = neuralTensorNetwork(input_dim=ntn_input_dim, output_dim=ntn_output_dim)
     print 'Train model summary:'
     train_model.summary()
     print 'Predict model summary:'
@@ -124,9 +127,9 @@ if __name__ == '__main__':
     print 'Training model'
     word_embedding_array = np.load(
         '../../data/event_embedding/word_embedding_dictionary/news_content_word_embedding_dictionary.npy')
-    print type(word_embedding_dictionary)
+    # print type(word_embedding_dictionary)
 
-    for i in range(500):  # epoch(N)=500, batch_size = 1
+    for i in range(500):  # epoch(N)=500, batch_size = X
         print 'epoch: %d' % i
         train_data_generator = TrainDataGenerator()
         for date_time, input1, input2, input3 in train_data_generator:
@@ -136,10 +139,10 @@ if __name__ == '__main__':
             idx_matrix = [np.random.randint(low=0, high=array_length, size=3).tolist() for i in range(len(input1))]
             corrupt_input1 = []
             for idx_array in idx_matrix:
-                corrupt_input = np.zeros(3)
+                corrupt_input = np.zeros(ntn_input_dim)
                 for idx in idx_array:
                     corrupt_input += word_embedding_array[idx]
-                corrupt_input = corrupt_input / 3
+                corrupt_input = corrupt_input / len(idx_array)
                 corrupt_input1.append(corrupt_input)
             
             train_model.train_on_batch(
