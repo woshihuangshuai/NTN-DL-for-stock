@@ -18,7 +18,7 @@ from keras.layers.recurrent import LSTM
 from keras.models import Sequential
 from keras.utils import np_utils
 
-from prettytable import PrettyTable·
+from prettytable import PrettyTable
 
 
 def get_event_embedding_dic():
@@ -102,7 +102,7 @@ def get_train_and_test_data_sequence(event_embedding_dic, stock_trend_dic, data_
     return train_input, train_label, test_input, test_label
 
 
-def lstmModel(input_dim=100, output_dim=2):
+def lstmModel(input_dim=10, output_dim=2):
     model = Sequential()
     model.add(LSTM(64, dropout_W=0.2, dropout_U=0.2,
                 input_shape=(30, input_dim), init='glorot_normal'))
@@ -114,7 +114,7 @@ def lstmModel(input_dim=100, output_dim=2):
     model.compile(loss='binary_crossentropy',
                 optimizer='adam',
                 metrics=['accuracy'])
-    print model.summary()
+    # print model.summary()
     return model
 
 
@@ -163,5 +163,5 @@ if __name__ == "__main__":
     result_file_dir = '../../data/predict_result/'
     if os.path.exists(result_file_dir) == False:
         os.makedirs(result_file_dir)
-    with open(result_file_dir + 'CNN_predict_result', 'w') as result_file:
+    with open(result_file_dir + 'LSTM_predict_result', 'w') as result_file:
         result_file.write(result_table.get_string())
