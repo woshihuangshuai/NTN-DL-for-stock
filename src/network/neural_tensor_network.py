@@ -115,7 +115,7 @@ if __name__ == '__main__':
     '''
 
     ntn_input_dim = 100
-    ntn_output_dim = 100
+    ntn_output_dim = 10
 
     print 'Buliding model'
     train_model, predict_model = neuralTensorNetwork(input_dim=ntn_input_dim, output_dim=ntn_output_dim)
