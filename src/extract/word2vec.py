@@ -46,7 +46,7 @@ def get_word2vec_model():
     else:
         sentences = Mysentences()
         model = gensim.models.Word2Vec(sentences, size=100, min_count=5, sg=1)
-        model.save('../../data/sg_model')
+        model.save('../../data/sg_model/sg_model')
     return model
 
 
