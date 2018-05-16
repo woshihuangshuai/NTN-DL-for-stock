@@ -84,7 +84,7 @@ class NeuralTensorLayer(Layer):
 
         bilinear_tensor_products = []
         for i in range(k):
-            bilinear_tensor_products.append(K.sum(e2 * K.dot(e1, self.W[i])))
+            bilinear_tensor_products.append(K.sum(e2 * K.dot(e1, self.W[i]), axis=1))
 
         result = K.tanh(K.reshape(K.concatenate(
             bilinear_tensor_products, axis=0), (batch_size, k)) + feed_forward_product + self.b)
