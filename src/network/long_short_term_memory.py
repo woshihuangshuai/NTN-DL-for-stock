@@ -104,9 +104,9 @@ def get_train_and_test_data_sequence(event_embedding_dic, stock_trend_dic, data_
 
 def lstmModel(input_dim=10, output_dim=2):
     model = Sequential()
-    model.add(LSTM(64, dropout_W=0.2, dropout_U=0.2,
+    model.add(LSTM(32, dropout_W=0.2, dropout_U=0.2,
                 input_shape=(30, input_dim), init='glorot_normal'))
-    model.add(Dense(32, init='glorot_normal'))
+    model.add(Dense(10, init='glorot_normal'))
     model.add(Activation('sigmoid'))
     model.add(Dense(output_dim, init='glorot_normal'))
     model.add(Activation('sigmoid'))
@@ -143,6 +143,7 @@ if __name__ == "__main__":
         accuracy = [0.0] * 3
         for i in range(3): # 对于一个数据集进行三次预测求平均准确率            
             model = lstmModel()
+            print model.summary()
             model.fit(train_input, train_label, batch_size=batch_size,
                     nb_epoch=nb_epoch, verbose=1)
             result = model.predict(test_input)
